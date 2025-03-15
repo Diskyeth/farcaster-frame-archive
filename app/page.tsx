@@ -1,13 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  type FarcasterSigner,
-  signFrameAction,
-} from "@frames.js/render/farcaster";
 import { useFrame } from "@frames.js/render/use-frame";
 import { fallbackFrameContext } from "@frames.js/render";
-import { type FrameUIComponents, FrameUI, type FrameUITheme } from "@frames.js/render/ui";
+import { FrameUI, type FrameUIComponents, type FrameUITheme } from "@frames.js/render/ui";
 import Image from "next/image";
 
 type StylingProps = {
@@ -35,8 +31,8 @@ const components: FrameUIComponents<StylingProps> = {
         src={sanitizedSrc}
         onLoadingComplete={props.onImageLoadEnd}
         alt="Frame image"
-        width={500} // Adjust width as needed
-        height={500} // Adjust height as needed
+        width={500} 
+        height={500} 
         style={{ width: "100%", height: "auto" }}
       />
     );
@@ -59,39 +55,104 @@ export default function Home() {
   const [url, setUrl] = useState("https://framesjs.org"); // Default frame URL
   const [currentFrameUrl, setCurrentFrameUrl] = useState(url);
 
-  const farcasterSigner: FarcasterSigner = {
-    fid: 1,
-    status: "approved",
-    publicKey: "0x00000000000000000000000000000000000000000000000000000000000000000",
-    privateKey: "0x00000000000000000000000000000000000000000000000000000000000000000",
-  };
-
-  // Update the frame when the user clicks "Load Frame"
+  // Load a new frame URL when user clicks the button
   const loadFrame = () => {
     setCurrentFrameUrl(url);
   };
 
   const frameState = useFrame({
-    homeframeUrl: currentFrameUrl,
+    homeframeUrl: currentFrameUrl, 
     frameActionProxy: "/frames",
     frameGetProxy: "/frames",
     connectedAddress: undefined,
     frameContext: fallbackFrameContext,
     signerState: {
-      hasSigner: farcasterSigner.status === "approved",
-      signer: farcasterSigner,
+      hasSigner: false, // ✅ No signer needed
+      signer: null, // ✅ Prevents errors
       isLoadingSigner: false,
+      specification: "farcaster_v2", // ✅ Corrected value
       async onSignerlessFramePress() {
         console.log("A frame button was pressed without a signer.");
       },
-      signFrameAction,
+      signFrameAction: async (context) => ({
+        signature: "", // ✅ Empty signature (not required)
+        signedPayload: {}, // ✅ Empty payload
+        body: {
+          action: "noop", // ✅ Dummy action
+          timestamp: Date.now(), // ✅ Adds a timestamp for structure
+        },
+        searchParams: new URLSearchParams(), // ✅ Properly formatted empty `URLSearchParams`
+      }),
       async logout() {
         console.log("logout");
       },
-      // ✅ Remove 'specification' if it's causing a type issue
-      withContext: (context) => ({ ...context }), // ✅ Ensures context is passed correctly
+      withContext: (context) => ({
+        signerState: {
+          hasSigner: false,
+          signer: null,
+          isLoadingSigner: false,
+          specification: "farcaster_v2",
+          async onSignerlessFramePress() {
+            console.log("A frame button was pressed without a signer.");
+          },
+          signFrameAction: async (context) => ({
+            signature: "",
+            signedPayload: {},
+            body: { action: "noop", timestamp: Date.now() },
+            searchParams: new URLSearchParams(),
+          }),
+          async logout() {
+            console.log("logout");
+          },
+          withContext: (newContext) => ({
+            signerState: {
+              hasSigner: false,
+              signer: null,
+              isLoadingSigner: false,
+              specification: "farcaster_v2",
+              async onSignerlessFramePress() {
+                console.log("A frame button was pressed without a signer.");
+              },
+              signFrameAction: async (context) => ({
+                signature: "",
+                signedPayload: {},
+                body: { action: "noop", timestamp: Date.now() },
+                searchParams: new URLSearchParams(),
+              }),
+              async logout() {
+                console.log("logout");
+              },
+              withContext: (context) => ({
+                signerState: {
+                  hasSigner: false,
+                  signer: null,
+                  isLoadingSigner: false,
+                  specification: "farcaster_v2",
+                  async onSignerlessFramePress() {
+                    console.log("A frame button was pressed without a signer.");
+                  },
+                  signFrameAction: async (context) => ({
+                    signature: "",
+                    signedPayload: {},
+                    body: { action: "noop", timestamp: Date.now() },
+                    searchParams: new URLSearchParams(),
+                  }),
+                  async logout() {
+                    console.log("logout");
+                  },
+                },
+                frameContext: context,
+              }),
+            },
+            frameContext: newContext,
+          }),
+        },
+        frameContext: context, // ✅ Required by `withContext`
+      }),
     },
   });
+  
+  
 
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
@@ -107,7 +168,7 @@ export default function Home() {
         Load Frame
       </button>
 
-      {/* Frame UI */}
+      {/* Render the frame */}
       <FrameUI frameState={frameState} components={components} theme={theme} />
     </div>
   );
