@@ -2,9 +2,13 @@
 
 import { useState } from "react";
 import { useFrame } from "@frames.js/render/use-frame";
-import { fallbackFrameContext } from "@frames.js/render";
+import { fallbackFrameContext, type FrameContext } from "@frames.js/render";
 import { FrameUI, type FrameUIComponents, type FrameUITheme } from "@frames.js/render/ui";
+import type { SignerStateActionContext } from "@frames.js/render";
 import Image from "next/image";
+
+// Define the supported parsing specifications
+type SupportedParsingSpecification = "farcaster" | "openframes";
 
 type StylingProps = {
   className?: string;
@@ -31,8 +35,8 @@ const components: FrameUIComponents<StylingProps> = {
         src={sanitizedSrc}
         onLoadingComplete={props.onImageLoadEnd}
         alt="Frame image"
-        width={500} 
-        height={500} 
+        width={500}
+        height={500}
         style={{ width: "100%", height: "auto" }}
       />
     );
@@ -44,7 +48,7 @@ const theme: FrameUITheme<StylingProps> = {
   Button: { className: "border text-sm text-gray-700 rounded flex-1 bg-white border-gray-300 p-2" },
   Root: { className: "flex flex-col w-full gap-2 border rounded-lg overflow-hidden bg-white relative" },
   Error: { className: "flex text-red-500 text-sm p-2 bg-white border border-red-500 rounded-md shadow-md aspect-square justify-center items-center" },
-  LoadingScreen: { className: "absolute top-0 left-0 right-0 bottom-0 bg-gray-300 z-10" },
+  LoadingScreen: { className: "absolute top-0 left-0 right-0 bottom: 0 bg-gray-300 z-10" },
   Image: { className: "w-full object-cover max-h-full" },
   ImageContainer: { className: "relative w-full h-full border-b border-gray-300 overflow-hidden", style: { aspectRatio: "var(--frame-image-aspect-ratio)" } },
   TextInput: { className: "p-[6px] border rounded border-gray-300 box-border w-full" },
@@ -60,98 +64,41 @@ export default function Home() {
     setCurrentFrameUrl(url);
   };
 
+  const signerState = {
+    hasSigner: false,
+    signer: null,
+    isLoadingSigner: false,
+    specification: ["farcaster"] as SupportedParsingSpecification[], // Mutable array
+
+    async onSignerlessFramePress() {
+      console.log("A frame button was pressed without a signer.");
+    },
+
+    signFrameAction: async (context: SignerStateActionContext<null, FrameContext>) => ({
+      signature: "",
+      signedPayload: {},
+      body: { action: "noop", timestamp: Date.now() },
+      searchParams: new URLSearchParams(),
+    }),
+
+    async logout() {
+      console.log("logout");
+    },
+
+    withContext: (context: FrameContext) => ({
+      signerState, // Correctly includes `signerState`
+      frameContext: context, // Adds `frameContext`
+    }),
+  };
+
   const frameState = useFrame({
-    homeframeUrl: currentFrameUrl, 
+    homeframeUrl: currentFrameUrl,
     frameActionProxy: "/frames",
     frameGetProxy: "/frames",
     connectedAddress: undefined,
     frameContext: fallbackFrameContext,
-    signerState: {
-      hasSigner: false, // ✅ No signer needed
-      signer: null, // ✅ Prevents errors
-      isLoadingSigner: false,
-      specification: "farcaster_v2", // ✅ Use a single string, not an array
-      async onSignerlessFramePress() {
-        console.log("A frame button was pressed without a signer.");
-      },
-      signFrameAction: async (context) => ({
-        signature: "", // ✅ Empty signature (not required)
-        signedPayload: {}, // ✅ Empty payload
-        body: {
-          action: "noop", // ✅ Dummy action
-          timestamp: Date.now(), // ✅ Adds a timestamp for structure
-        },
-        searchParams: new URLSearchParams(), // ✅ Properly formatted empty `URLSearchParams`
-      }),
-      async logout() {
-        console.log("logout");
-      },
-      withContext: (context) => ({
-        signerState: {
-          hasSigner: false,
-          signer: null,
-          isLoadingSigner: false,
-          specification: "farcaster_v2", // ✅ Ensuring consistency
-          async onSignerlessFramePress() {
-            console.log("A frame button was pressed without a signer.");
-          },
-          signFrameAction: async (context) => ({
-            signature: "",
-            signedPayload: {},
-            body: { action: "noop", timestamp: Date.now() },
-            searchParams: new URLSearchParams(),
-          }),
-          async logout() {
-            console.log("logout");
-          },
-          withContext: (newContext) => ({
-            signerState: {
-              hasSigner: false,
-              signer: null,
-              isLoadingSigner: false,
-              specification: "farcaster_v2",
-              async onSignerlessFramePress() {
-                console.log("A frame button was pressed without a signer.");
-              },
-              signFrameAction: async (context) => ({
-                signature: "",
-                signedPayload: {},
-                body: { action: "noop", timestamp: Date.now() },
-                searchParams: new URLSearchParams(),
-              }),
-              async logout() {
-                console.log("logout");
-              },
-              withContext: (context) => ({
-                signerState: {
-                  hasSigner: false,
-                  signer: null,
-                  isLoadingSigner: false,
-                  specification: "farcaster_v2",
-                  async onSignerlessFramePress() {
-                    console.log("A frame button was pressed without a signer.");
-                  },
-                  signFrameAction: async (context) => ({
-                    signature: "",
-                    signedPayload: {},
-                    body: { action: "noop", timestamp: Date.now() },
-                    searchParams: new URLSearchParams(),
-                  }),
-                  async logout() {
-                    console.log("logout");
-                  },
-                },
-                frameContext: context,
-              }),
-            },
-            frameContext: newContext,
-          }),
-        },
-        frameContext: context, // ✅ Required by `withContext`
-      }),
-    },
+    signerState, // Uses the fixed `signerState`
   });
-  
 
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
