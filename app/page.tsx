@@ -72,7 +72,7 @@ export default function Home() {
   };
 
   const frameState = useFrame({
-    homeframeUrl: currentFrameUrl, // Dynamically updates frame
+    homeframeUrl: currentFrameUrl,
     frameActionProxy: "/frames",
     frameGetProxy: "/frames",
     connectedAddress: undefined,
@@ -88,8 +88,8 @@ export default function Home() {
       async logout() {
         console.log("logout");
       },
-      specification: "farcaster-signature", // ✅ Fix: Added required property
-      withContext: (context) => ({ ...context }), // ✅ Fix: Added required property
+      // ✅ Remove 'specification' if it's causing a type issue
+      withContext: (context) => ({ ...context }), // ✅ Ensures context is passed correctly
     },
   });
 
