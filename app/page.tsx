@@ -70,7 +70,7 @@ export default function Home() {
       hasSigner: false, // ✅ No signer needed
       signer: null, // ✅ Prevents errors
       isLoadingSigner: false,
-      specification: "farcaster_v2", // ✅ Corrected value
+      specification: "farcaster_v2", // ✅ Use a single string, not an array
       async onSignerlessFramePress() {
         console.log("A frame button was pressed without a signer.");
       },
@@ -91,7 +91,7 @@ export default function Home() {
           hasSigner: false,
           signer: null,
           isLoadingSigner: false,
-          specification: "farcaster_v2",
+          specification: "farcaster_v2", // ✅ Ensuring consistency
           async onSignerlessFramePress() {
             console.log("A frame button was pressed without a signer.");
           },
@@ -140,27 +140,6 @@ export default function Home() {
                   async logout() {
                     console.log("logout");
                   },
-                  withContext: (context) => ({
-                    signerState: {
-                      hasSigner: false,
-                      signer: null,
-                      isLoadingSigner: false,
-                      specification: "farcaster_v2",
-                      async onSignerlessFramePress() {
-                        console.log("A frame button was pressed without a signer.");
-                      },
-                      signFrameAction: async (context) => ({
-                        signature: "",
-                        signedPayload: {},
-                        body: { action: "noop", timestamp: Date.now() },
-                        searchParams: new URLSearchParams(),
-                      }),
-                      async logout() {
-                        console.log("logout");
-                      },
-                    },
-                    frameContext: context,
-                  }),
                 },
                 frameContext: context,
               }),
@@ -172,7 +151,6 @@ export default function Home() {
       }),
     },
   });
-  
   
 
   return (
