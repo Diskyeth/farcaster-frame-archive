@@ -11,7 +11,7 @@
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.31",
     "@frames.js/render": "^0.5.5",
-    "next": "15.2.2",
+    "next": "^14.2.24",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
