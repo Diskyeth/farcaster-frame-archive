@@ -1,114 +1,109 @@
 "use client";
 
-import { useState } from "react";
-import {
-  type FarcasterSigner,
-  signFrameAction,
-} from "@frames.js/render/farcaster";
-import { useFrame } from "@frames.js/render/use-frame";
-import { fallbackFrameContext, type FrameContext } from "@frames.js/render";
-import { FrameUI, type FrameUIComponents, type FrameUITheme } from "@frames.js/render/ui";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
-type StylingProps = {
-  className?: string;
-  style?: React.CSSProperties;
+type Frame = {
+  id: string;
+  name: string;
+  creator_name: string;
+  url: string;
+  icon_url: string;
+  created_at: string;
 };
 
-const components: FrameUIComponents<StylingProps> = {
-  Image: (props, stylingProps) => {
-    if (props.status === "frame-loading") return <></>;
+export default function HomePage() {
+  const [frames, setFrames] = useState<Frame[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    let sanitizedSrc = props.src;
-    if (props.src.startsWith("data:") && !props.src.startsWith("data:image")) sanitizedSrc = "";
-    if (props.src.startsWith("data:image/svg")) sanitizedSrc = "";
+  useEffect(() => {
+    const fetchFrames = async () => {
+      try {
+        const response = await fetch('/api/frame-list');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch frames');
+        }
+        
+        const data = await response.json();
+        setFrames(data.frames);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    fetchFrames();
+  }, []);
+
+  if (isLoading) {
     return (
-      <img
-        {...stylingProps}
-        src={sanitizedSrc}
-        onLoad={props.onImageLoadEnd}
-        onError={props.onImageLoadEnd}
-        alt="Frame image"
-        style={{ width: "100%", height: "auto" }}
-      />
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
     );
-  },
-};
+  }
 
-
-const theme: FrameUITheme<StylingProps> = {
-  ButtonsContainer: { className: "flex gap-2 px-2 pb-2 bg-white" },
-  Button: { className: "border text-sm text-gray-700 rounded flex-1 bg-white border-gray-300 p-2" },
-  Root: { className: "flex flex-col w-full gap-2 border rounded-lg overflow-hidden bg-white relative" },
-  Error: { className: "flex text-red-500 text-sm p-2 bg-white border border-red-500 rounded-md shadow-md aspect-square justify-center items-center" },
-  LoadingScreen: { className: "absolute inset-0 bg-gray-300 z-10" },
-  Image: { className: "w-full object-cover max-h-full" },
-  ImageContainer: { className: "relative w-full h-full border-b border-gray-300 overflow-hidden", style: { aspectRatio: "var(--frame-image-aspect-ratio)" } },
-  TextInput: { className: "p-2 border rounded border-gray-300 box-border w-full" },
-  TextInputContainer: { className: "w-full px-2" },
-};
-
-export default function Home() {
-  const [url, setUrl] = useState("https://framesjs.org");
-  const [currentFrameUrl, setCurrentFrameUrl] = useState(url);
-
-  const farcasterSigner: FarcasterSigner = {
-    fid: 1,
-    status: "approved",
-    publicKey: "0x00000000000000000000000000000000000000000000000000000000000000000",
-    privateKey: "0x00000000000000000000000000000000000000000000000000000000000000000",
-  };
-
-  const loadFrame = () => setCurrentFrameUrl(url);
-
-  // Use type 'any' for the entire signerState to bypass type checking
-  const signerState: any = {
-    hasSigner: farcasterSigner.status === "approved",
-    signer: farcasterSigner,
-    isLoadingSigner: false,
-    specification: "farcaster-signature",
-
-    async onSignerlessFramePress() {
-      console.log("A frame button was pressed without a signer.");
-    },
-
-    signFrameAction,
-
-    async logout() {
-      console.log("logout");
-    },
-
-    withContext: (context: FrameContext) => ({
-      signerState,
-      frameContext: context,
-    }),
-  };
-
-  const frameState = useFrame({
-    homeframeUrl: currentFrameUrl,
-    frameActionProxy: "/frames",
-    frameGetProxy: "/frames",
-    connectedAddress: undefined,
-    frameContext: fallbackFrameContext,
-    signerState,
-  });
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p>Error: {error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-5 max-w-md mx-auto">
-      <h1 className="text-lg font-bold">Farcaster V1 Frame Loader</h1>
-      <input
-        type="text"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="Enter frame URL..."
-        className="w-full p-2 border rounded my-2"
-      />
-      <button onClick={loadFrame} className="w-full p-2 bg-blue-500 text-white rounded">
-        Load Frame
-      </button>
-
-      {/* Frame UI */}
-      <FrameUI frameState={frameState} components={components} theme={theme} />
+    <div className="container mx-auto px-4 py-8">
+      <header className="mb-10">
+        <h1 className="text-3xl font-bold mb-4">Frame Archive</h1>
+        <p className="text-gray-600">Browse and interact with Farcaster Frames</p>
+      </header>
+      
+      <section>
+        <h2 className="text-2xl font-semibold mb-6">Featured Frames</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {frames.map((frame) => (
+            <Link 
+              href={`/frame/${encodeURIComponent(frame.id)}`} 
+              key={frame.id}
+              className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center p-4">
+                <div className="flex-shrink-0 mr-4">
+                  {frame.icon_url ? (
+                    <Image 
+                      src={frame.icon_url} 
+                      alt={frame.name} 
+                      width={64} 
+                      height={64} 
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-gray-500 text-xl">F</span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{frame.name}</h3>
+                  <p className="text-gray-600 text-sm">By {frame.creator_name}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        
+        {frames.length === 0 && (
+          <div className="text-center py-10">
+            <p className="text-gray-500">No frames found</p>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
