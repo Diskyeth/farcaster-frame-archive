@@ -140,6 +140,27 @@ export default function Home() {
                   async logout() {
                     console.log("logout");
                   },
+                  withContext: (context) => ({
+                    signerState: {
+                      hasSigner: false,
+                      signer: null,
+                      isLoadingSigner: false,
+                      specification: "farcaster_v2",
+                      async onSignerlessFramePress() {
+                        console.log("A frame button was pressed without a signer.");
+                      },
+                      signFrameAction: async (context) => ({
+                        signature: "",
+                        signedPayload: {},
+                        body: { action: "noop", timestamp: Date.now() },
+                        searchParams: new URLSearchParams(),
+                      }),
+                      async logout() {
+                        console.log("logout");
+                      },
+                    },
+                    frameContext: context,
+                  }),
                 },
                 frameContext: context,
               }),
