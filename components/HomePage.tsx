@@ -1,24 +1,19 @@
-// File: app/page.tsx
-import { Metadata } from "next";
-import HomePage from "@/components/HomePage"; // Adjust this path based on where you move your HomePage component
+// File: components/HomePage.tsx
+"use client";
 
-// Frame configuration for Farcaster
-const frame = {
-  version: "1.0.0",
-  imageUrl: `https://www.legacyframes.xyz/banner.png`,
-  button: {
-    title: "Launch Frame",
-    action: {
-      type: "launch_frame",
-      name: "Legacy Frames Archive",
-      url: `https://www.legacyframes.xyz/`,
-      splashImageUrl: `https://www.legacyframes.xyz/icon.png`,
-      splashBackgroundColor: "#10001D",
-    },
-  },
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useSearchParams, useRouter } from 'next/navigation';
+
+const appUrl = process.env.NEXT_PUBLIC_URL || "https://www.legacyframes.xyz";
+
+type Tag = {
+  id: string;
+  name: string;
+  slug: string;
 };
 
-<<<<<<< Updated upstream
 type Frame = {
   id: string;
   name: string;
@@ -28,28 +23,71 @@ type Frame = {
   icon_url: string;
   created_at: string;
   tags?: string[];
-  description?: string; // Added description field
 };
-=======
-export const revalidate = 300;
->>>>>>> Stashed changes
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Legacy Frames Archive",
-    description: "To preserve and enjoy V1 Frames",
-    openGraph: {
-      title: "Legacy Frames Archive",
-      description: "To preserve and enjoy V1 Frames",
-      images: [{ url: `https://www.legacyframes.xyz/banner.png` }],
-    },
-    other: {
-      "fc:frame": JSON.stringify(frame),
-    },
+export default function HomePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentTag = searchParams.get('tag') || 'all';
+  
+  const [frames, setFrames] = useState<Frame[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [isLoadingTags, setIsLoadingTags] = useState(true);
+  const [isLoadingFrames, setIsLoadingFrames] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch tags
+  useEffect(() => {
+    const fetchTags = async () => {
+      setIsLoadingTags(true);
+      try {
+        console.log("Fetching tags...");
+        const response = await fetch("/api/tags");
+        if (!response.ok) throw new Error("Failed to fetch tags");
+
+        const data = await response.json();
+        console.log("Received tags:", data.tags);
+        setTags(data.tags);
+      } catch (err) {
+        console.error("Error fetching tags:", err);
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setIsLoadingTags(false);
+      }
+    };
+
+    fetchTags();
+  }, []);
+
+  // Fetch frames based on selected tag
+  useEffect(() => {
+    const fetchFrames = async () => {
+      setIsLoadingFrames(true);
+      try {
+        console.log(`Fetching frames with tag: ${currentTag}`);
+        const response = await fetch(`/api/frame-list?tag=${currentTag}`);
+        if (!response.ok) throw new Error("Failed to fetch frames");
+
+        const data = await response.json();
+        console.log("Received frames:", data.frames);
+        setFrames(data.frames);
+      } catch (err) {
+        console.error("Error fetching frames:", err);
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setIsLoadingFrames(false);
+      }
+    };
+
+    fetchFrames();
+  }, [currentTag]);
+
+  // Filter change handler
+  const handleTagChange = (tagSlug: string) => {
+    console.log(`Changing tag to: ${tagSlug}`);
+    router.push(`/?tag=${tagSlug}`);
   };
-}
 
-<<<<<<< Updated upstream
   // Function to handle creator name click
   const handleCreatorClick = (e: React.MouseEvent, profileUrl: string | undefined) => {
     if (profileUrl) {
@@ -126,7 +164,7 @@ export async function generateMetadata(): Promise<Metadata> {
               <div key={frame.id}>
                 <Link
                   href={`/frame/${encodeURIComponent(frame.id)}`}
-                  className="flex items-start py-4 hover:opacity-80 transition-opacity"
+                  className="flex items-center py-4 hover:opacity-80 transition-opacity"
                 >
                   {/* Frame Icon */}
                   <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
@@ -149,14 +187,6 @@ export async function generateMetadata(): Promise<Metadata> {
                   {/* Frame Info */}
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold">{frame.name}</h3>
-                    
-                    {/* Description */}
-                    {frame.description && (
-                      <p className="text-gray-400 text-sm mt-1 mb-1 line-clamp-2">
-                        {frame.description}
-                      </p>
-                    )}
-                    
                     <p 
                       onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
                       className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}
@@ -183,9 +213,4 @@ export async function generateMetadata(): Promise<Metadata> {
       </section>
     </div>
   );
-=======
-// This is the main page server component
-export default function Page() {
-  return <HomePage />;
->>>>>>> Stashed changes
 }
