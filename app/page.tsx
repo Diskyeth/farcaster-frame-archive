@@ -47,7 +47,7 @@ export default function HomePage() {
         console.log("Received tags:", data.tags);
         
         // Filter out any "all" tag if it exists in the API response
-        const filteredTags = data.tags.filter(tag => tag.slug !== 'all');
+        const filteredTags = data.tags.filter((tag: Tag) => tag.slug !== 'all');
         setTags(filteredTags);
       } catch (err) {
         console.error("Error fetching tags:", err);
@@ -133,9 +133,6 @@ export default function HomePage() {
             }}
             className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
             Submit
           </a>
         </div>
@@ -162,7 +159,7 @@ export default function HomePage() {
         
         {/* Other tag buttons */}
         {tags.length > 0 && 
-          tags.map((tag) => (
+          tags.map((tag: Tag) => (
             <button
               key={tag.id}
               onClick={() => handleTagChange(tag.slug)}
@@ -186,7 +183,7 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="flex flex-col">
-            {frames.map((frame, index) => (
+            {frames.map((frame: Frame, index: number) => (
               <div key={frame.id}>
                 <Link
                   href={`/frame/${encodeURIComponent(frame.id)}`}
