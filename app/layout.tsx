@@ -3,31 +3,33 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from "./providers";
 
+
 export const metadata: Metadata = {
-  title: 'Legacy Frames',
-  description: 'Explore Legacy Frames',
+  title: 'anoncast',
+  description: 'Post anonymously to Farcaster.',
   openGraph: {
-    title: 'Legacy Frames',
-    description: 'Explore Legacy Frames',
-    images: ['/icon.png'],
+    title: 'anoncast',
+    description: 'Post anonymously to Farcaster.',
+    images: ['/anon.png'],
   },
   other: {
     ['fc:frame']: JSON.stringify({
-      version: '1.1',
-      imageUrl: 'https://legacyframes.xyz/banner.png',
+      version: 'next',
+      imageUrl: 'https://anoncast.org/banner.png',
       button: {
-        title: 'Explore Legacy Frames',
+        title: 'Post anonymously',
         action: {
           type: 'launch_frame',
-          name: 'Legacy Frames',
-          url: 'https://legacyframes.xyz/',
-          splashImageUrl: 'https://legacyframes.xyz/icon.png',
-          splashBackgroundColor: '#10001D',
+          name: 'anoncast',
+          url: 'https://frame.anoncast.org',
+          splashImageUrl: 'https://anoncast.org/anon.png',
+          splashBackgroundColor: '#151515',
         },
       },
     }),
   },
 }
+
 export default function RootLayout({
   children,
 }: Readonly<{
