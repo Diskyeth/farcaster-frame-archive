@@ -152,10 +152,10 @@ export default function FrameView() {
           <p>Error: {error || 'Frame not found'}</p>
         </div>
         <button 
-  onClick={() => router.push('/frame-list')} 
+  onClick={() => router.push('/')} 
   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
 >
-  Back to Frames List
+  Back
 </button>
       </div>
     );
@@ -165,10 +165,10 @@ export default function FrameView() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <button 
-          onClick={() => router.push('/frame-list')}
+          onClick={() => router.push('/')}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          Back to Frames List
+          Back
         </button>
       </div>
       

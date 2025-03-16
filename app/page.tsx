@@ -3,53 +3,102 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams, useRouter } from 'next/navigation';
+
+type Tag = {
+  id: string;
+  name: string;
+  slug: string;
+};
 
 type Frame = {
   id: string;
   name: string;
   creator_name: string;
+  creator_profile_url?: string;
   url: string;
   icon_url: string;
   created_at: string;
+  tags?: string[];
 };
 
 export default function HomePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentTag = searchParams.get('tag') || 'all';
+  
   const [frames, setFrames] = useState<Frame[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [isLoadingTags, setIsLoadingTags] = useState(true);
+  const [isLoadingFrames, setIsLoadingFrames] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch tags
+  useEffect(() => {
+    const fetchTags = async () => {
+      setIsLoadingTags(true);
+      try {
+        console.log("Fetching tags...");
+        const response = await fetch("/api/tags");
+        if (!response.ok) throw new Error("Failed to fetch tags");
+
+        const data = await response.json();
+        console.log("Received tags:", data.tags);
+        setTags(data.tags);
+      } catch (err) {
+        console.error("Error fetching tags:", err);
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setIsLoadingTags(false);
+      }
+    };
+
+    fetchTags();
+  }, []);
+
+  // Fetch frames based on selected tag
   useEffect(() => {
     const fetchFrames = async () => {
+      setIsLoadingFrames(true);
       try {
-        const response = await fetch("/api/frame-list");
+        console.log(`Fetching frames with tag: ${currentTag}`);
+        const response = await fetch(`/api/frame-list?tag=${currentTag}`);
         if (!response.ok) throw new Error("Failed to fetch frames");
 
         const data = await response.json();
+        console.log("Received frames:", data.frames);
         setFrames(data.frames);
       } catch (err) {
+        console.error("Error fetching frames:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
-        setIsLoading(false);
+        setIsLoadingFrames(false);
       }
     };
 
     fetchFrames();
-  }, []);
+  }, [currentTag]);
 
-  if (isLoading) {
+  // Filter change handler
+  const handleTagChange = (tagSlug: string) => {
+    console.log(`Changing tag to: ${tagSlug}`);
+    router.push(`/?tag=${tagSlug}`);
+  };
+
+  // Function to handle creator name click
+  const handleCreatorClick = (e: React.MouseEvent, profileUrl: string | undefined) => {
+    if (profileUrl) {
+      e.preventDefault(); // Prevent the parent Link from navigating
+      window.open(profileUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const isLoading = isLoadingTags || isLoadingFrames;
+
+  if (isLoading && frames.length === 0) {
     return (
-      <div className="flex justify-center items-center h-screen bg-[#0b0b0f]">
+      <div className="flex justify-center items-center h-screen bg-[#10001D]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-[#0b0b0f]">
-        <div className="bg-red-500 text-white px-4 py-3 rounded-lg">
-          <p>Error: {error}</p>
-        </div>
       </div>
     );
   }
@@ -61,45 +110,83 @@ export default function HomePage() {
         <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
       </header>
 
+      {/* Tag Filters */}
+      <div className="flex flex-wrap justify-center gap-2 mb-8">
+        {tags.length > 0 ? (
+          tags.map((tag) => (
+            <button
+              key={tag.id}
+              onClick={() => handleTagChange(tag.slug)}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                currentTag === tag.slug
+                  ? 'bg-[#8C56FF] text-white'
+                  : 'bg-[#1D1D29] text-white hover:bg-[#2A2A3C]'
+              }`}
+            >
+              {tag.name}
+            </button>
+          ))
+        ) : (
+          <div className="text-gray-400">No tags available</div>
+        )}
+      </div>
+
       {/* Frame List */}
       <section className="max-w-2xl mx-auto">
-        <div className="flex flex-col gap-6">
-          {frames.map((frame) => (
-            <Link
-              href={`/frame/${encodeURIComponent(frame.id)}`}
-              key={frame.id}
-              className="flex items-center bg-[#14141b] hover:bg-[#1b1b24] transition-all rounded-lg p-4"
-            >
-              {/* Frame Icon */}
-              <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
-                {frame.icon_url ? (
-                  <Image
-                    src={frame.icon_url}
-                    alt={frame.name}
-                    width={64}
-                    height={64}
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-600 flex items-center justify-center text-lg">
-                    F
+        {isLoadingFrames ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            {frames.map((frame, index) => (
+              <div key={frame.id}>
+                <Link
+                  href={`/frame/${encodeURIComponent(frame.id)}`}
+                  className="flex items-center py-4 hover:opacity-80 transition-opacity"
+                >
+                  {/* Frame Icon */}
+                  <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+                    {frame.icon_url ? (
+                      <Image
+                        src={frame.icon_url}
+                        alt={frame.name}
+                        width={64}
+                        height={64}
+                        className="object-cover"
+                        unoptimized={true}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-600 flex items-center justify-center text-lg">
+                        F
+                      </div>
+                    )}
                   </div>
+
+                  {/* Frame Info */}
+                  <div className="ml-4">
+                    <h3 className="text-lg font-semibold">{frame.name}</h3>
+                    <p 
+                      onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
+                      className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}
+                    >
+                      @{frame.creator_name}
+                    </p>
+                  </div>
+                </Link>
+                
+                {/* Add separator line after each item except the last one */}
+                {index < frames.length - 1 && (
+                  <div className="border-b border-[#2A2A3C]"></div>
                 )}
               </div>
+            ))}
 
-              {/* Frame Info */}
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold">{frame.name}</h3>
-                <p className="text-gray-400 text-sm">@{frame.creator_name}</p>
+            {frames.length === 0 && !isLoadingFrames && (
+              <div className="text-center py-10">
+                <p className="text-gray-400">No frames found for this filter</p>
               </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* No Frames Message */}
-        {frames.length === 0 && (
-          <div className="text-center py-10">
-            <p className="text-gray-400">No frames found</p>
+            )}
           </div>
         )}
       </section>
