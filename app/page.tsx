@@ -1,5 +1,6 @@
+// File: app/page.tsx
 import { Metadata } from "next";
-import FrameList from "@/components/FrameList";  // We'll create this component
+import HomePage from "../components/HomePage"; // Adjust this path based on where you move your HomePage component
 
 const appUrl = process.env.NEXT_PUBLIC_URL || "https://www.legacyframes.xyz";
 
@@ -35,6 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// This is the main page server component
 export default function Home() {
-  return <FrameList />;
+  return <HomePage />;
 }
