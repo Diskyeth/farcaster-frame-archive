@@ -17,8 +17,14 @@ export default function HomePage() {
   const [frames, setFrames] = useState<Frame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>('');
 
   useEffect(() => {
+    // Get current URL for the frame instructions
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.href);
+    }
+    
     const fetchFrames = async () => {
       try {
         const response = await fetch('/api/frame-list');
@@ -59,10 +65,38 @@ export default function HomePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <header className="mb-10">
+      <header className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Frame Archive</h1>
         <p className="text-gray-600">Browse and interact with Farcaster Frames</p>
       </header>
+      
+      {/* Farcaster Frame Info Banner */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-5 mb-8">
+        <div className="flex items-start">
+          <div className="bg-blue-500 text-white p-2 rounded-full mr-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold mb-2">🖼️ This is a Farcaster Frame!</h2>
+            <p className="mb-3 text-gray-700">
+              Cast this URL on Farcaster to interact with Frame Archive directly in your feed.
+            </p>
+            <div className="bg-white p-3 rounded border font-mono text-sm break-all mb-3">
+              {currentUrl}
+            </div>
+            <a 
+              href="https://docs.farcaster.xyz/developers/frames/v2/getting-started" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-500 hover:text-blue-700 inline-block"
+            >
+              Learn more about Farcaster Frames →
+            </a>
+          </div>
+        </div>
+      </div>
       
       <section>
         <h2 className="text-2xl font-semibold mb-6">Featured Frames</h2>
@@ -76,13 +110,18 @@ export default function HomePage() {
               <div className="flex items-center p-4">
                 <div className="flex-shrink-0 mr-4">
                   {frame.icon_url ? (
-                    <Image 
-                      src={frame.icon_url} 
-                      alt={frame.name} 
-                      width={64} 
-                      height={64} 
-                      className="rounded-full"
-                    />
+                    <div className="w-16 h-16 relative">
+                      <img 
+                        src={frame.icon_url} 
+                        alt={frame.name} 
+                        width={64} 
+                        height={64}
+                        className="rounded-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "https://placehold.co/64x64?text=F";
+                        }}
+                      />
+                    </div>
                   ) : (
                     <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
                       <span className="text-gray-500 text-xl">F</span>
