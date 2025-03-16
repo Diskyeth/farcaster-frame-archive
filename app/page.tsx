@@ -1,8 +1,8 @@
-// File: app/page.tsx
 import { Metadata } from "next";
-import HomePage from "../components/HomePage"; // Adjust this path based on where you move your HomePage component
+import FrameList from "@/components/FrameList";  // We'll create this component
 
-// Frame configuration for Farcaster
+const appUrl = process.env.NEXT_PUBLIC_URL || "https://www.legacyframes.xyz";
+
 const frame = {
   version: "1.0.0",
   imageUrl: `https://www.legacyframes.xyz/banner.png`,
@@ -35,7 +35,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// This is the main page server component
-export default function Page() {
-  return <HomePage />;
+export default function Home() {
+  return <FrameList />;
 }
