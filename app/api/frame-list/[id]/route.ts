@@ -18,6 +18,7 @@ export async function GET(
           id, 
           name, 
           creator_name, 
+          creator_profile_url,
           url, 
           icon_url
         FROM frames

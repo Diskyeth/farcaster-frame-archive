@@ -8,6 +8,7 @@ type Frame = {
   id: string;
   name: string;
   creator_name: string;
+  creator_profile_url?: string;
   url: string;
   icon_url: string;
   created_at: string;
@@ -54,6 +55,14 @@ export default function HomePage() {
     );
   }
 
+  // Function to handle creator name click
+  const handleCreatorClick = (e: React.MouseEvent, profileUrl: string | undefined) => {
+    if (profileUrl) {
+      e.preventDefault(); // Prevent the parent Link from navigating
+      window.open(profileUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#10001D] text-white px-4 py-8">
       {/* Centered Logo */}
@@ -90,7 +99,12 @@ export default function HomePage() {
               {/* Frame Info */}
               <div className="ml-4">
                 <h3 className="text-lg font-semibold">{frame.name}</h3>
-                <p className="text-gray-400 text-sm">@{frame.creator_name}</p>
+                <p 
+                  onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
+                  className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}
+                >
+                  @{frame.creator_name}
+                </p>
               </div>
             </Link>
           ))}
