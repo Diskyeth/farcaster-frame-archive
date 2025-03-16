@@ -110,34 +110,45 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#10001D] text-white px-4 py-8">
-      {/* Header with Logo and Buttons */}
-      <header className="max-w-2xl mx-auto mb-8 flex items-center justify-between">
-        <div>
-          <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.push('/load-frame')}
-            className="px-4 py-2 bg-[#1D1D29] text-white rounded-full hover:bg-[#2A2A3C] flex items-center gap-2 border border-[#2A2A3C]"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            Load
-          </button>
-          <a 
-            href="https://forms.gle/oqpNiuK6vkveHhNv9" 
-            onClick={(e) => {
-              e.preventDefault();
-              window.open("https://forms.gle/oqpNiuK6vkveHhNv9", "_top");
-            }}
-            className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
-          >
-            Submit
-          </a>
-        </div>
-      </header>
 
+<header className="max-w-2xl mx-auto mb-8">
+  <div className="flex items-center justify-between gap-4">
+    <div className="min-w-0 flex-shrink">
+      <Image 
+        src="/logo.png" 
+        alt="Logo" 
+        width={204} 
+        height={50} 
+        priority 
+        className="max-w-full h-auto"
+      />
+    </div>
+    <div className="flex items-center gap-3 flex-shrink-0">
+      <button
+        onClick={() => router.push('/load-frame')}
+        className="px-4 py-2 bg-[#1D1D29] text-white rounded-full hover:bg-[#2A2A3C] flex items-center gap-2 border border-[#2A2A3C]"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        Load
+      </button>
+      <a 
+        href="https://forms.gle/oqpNiuK6vkveHhNv9" 
+        onClick={(e) => {
+          e.preventDefault();
+          window.open("https://forms.gle/oqpNiuK6vkveHhNv9", "_top");
+        }}
+        className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+        Submit
+      </a>
+    </div>
+  </div>
+</header>
       {/* Disclaimer Text */}
       <div className="text-gray-400 text-sm mb-6 max-w-2xl mx-auto">
         <p>This project was created to preserve the legacy of the V1 frame in Farcaster. However, there are no guarantees that each frame will continue to work as intended.</p>
