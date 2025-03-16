@@ -22,7 +22,8 @@ export async function GET(req: Request) {
           f.creator_profile_url,
           f.url, 
           f.icon_url,
-          f.created_at
+          f.created_at,
+          f.description
         FROM frames f
         ORDER BY f.created_at DESC
       `;
@@ -36,7 +37,8 @@ export async function GET(req: Request) {
           f.creator_profile_url,
           f.url, 
           f.icon_url,
-          f.created_at
+          f.created_at,
+          f.description
         FROM frames f
         JOIN frame_tags ft ON f.id = ft.frame_id
         JOIN tags t ON ft.tag_id = t.id

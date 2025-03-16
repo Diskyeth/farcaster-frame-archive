@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   type FarcasterSigner,
   signFrameAction,
@@ -38,14 +39,14 @@ const components: FrameUIComponents<StylingProps> = {
 };
 
 const theme: FrameUITheme<StylingProps> = {
-  ButtonsContainer: { className: "flex gap-2 px-2 pb-2 bg-white" },
-  Button: { className: "border text-sm text-gray-700 rounded flex-1 bg-white border-gray-300 p-2" },
-  Root: { className: "flex flex-col w-full gap-2 border rounded-lg overflow-hidden bg-white relative" },
-  Error: { className: "flex text-red-500 text-sm p-2 bg-white border border-red-500 rounded-md shadow-md aspect-square justify-center items-center" },
-  LoadingScreen: { className: "absolute inset-0 bg-gray-300 z-10" },
+  ButtonsContainer: { className: "flex gap-2 px-2 pb-2 bg-[#14141b]" },
+  Button: { className: "border text-sm text-white rounded flex-1 bg-[#14141b] border-[#2A2A3C] p-2 hover:bg-[#1b1b24]" },
+  Root: { className: "flex flex-col w-full gap-2 border rounded-lg overflow-hidden bg-[#14141b] relative border-[#2A2A3C]" },
+  Error: { className: "flex text-red-500 text-sm p-2 bg-[#14141b] border border-red-500 rounded-md shadow-md aspect-square justify-center items-center" },
+  LoadingScreen: { className: "absolute inset-0 bg-[#14141b] z-10" },
   Image: { className: "w-full object-cover max-h-full" },
-  ImageContainer: { className: "relative w-full h-full border-b border-gray-300 overflow-hidden", style: { aspectRatio: "var(--frame-image-aspect-ratio)" } },
-  TextInput: { className: "p-2 border rounded border-gray-300 box-border w-full" },
+  ImageContainer: { className: "relative w-full h-full border-b border-[#2A2A3C] overflow-hidden", style: { aspectRatio: "var(--frame-image-aspect-ratio)" } },
+  TextInput: { className: "p-2 border rounded border-[#2A2A3C] box-border w-full bg-[#14141b] text-white" },
   TextInputContainer: { className: "w-full px-2" },
 };
 
@@ -53,8 +54,10 @@ type Frame = {
   id: string;
   name: string;
   creator_name: string;
+  creator_profile_url?: string;
   url: string;
   icon_url: string;
+  description?: string; // Added description field
 };
 
 export default function FrameView() {
@@ -100,6 +103,14 @@ export default function FrameView() {
     fetchFrame();
   }, [frameId]);
 
+  // Function to handle creator name click
+  const handleCreatorClick = (e: React.MouseEvent, profileUrl: string | undefined) => {
+    if (profileUrl) {
+      e.preventDefault();
+      window.open(profileUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   // Use any type to bypass type checking for signerState
   const signerState: any = {
     hasSigner: farcasterSigner.status === "approved",
@@ -139,61 +150,87 @@ export default function FrameView() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex justify-center items-center h-screen bg-[#10001D]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
       </div>
     );
   }
 
   if (error || !frame) {
     return (
-      <div className="flex flex-col items-center py-10">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      <div className="flex flex-col items-center py-10 bg-[#10001D] min-h-screen text-white">
+        <div className="bg-red-500 text-white px-4 py-3 rounded mb-4">
           <p>Error: {error || 'Frame not found'}</p>
         </div>
         <button 
-  onClick={() => router.push('/')} 
-  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
->
-  Back
-</button>
+          onClick={() => router.push('/')} 
+          className="px-6 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <button 
-          onClick={() => router.push('/')}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Back
-        </button>
-      </div>
-      
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <div className="flex items-center mb-4">
-          {frame.icon_url && (
-            <img 
-              src={frame.icon_url} 
-              alt={frame.name} 
-              className="w-12 h-12 rounded-full mr-4"
-              onError={(e) => {
-                e.currentTarget.src = "https://placehold.co/64x64?text=F";
-              }}
-            />
-          )}
-          <div>
-            <h1 className="text-2xl font-bold">{frame.name}</h1>
-            <p className="text-gray-600">By {frame.creator_name}</p>
+    <div className="min-h-screen bg-[#10001D] text-white px-4 py-8">
+      <div className="container mx-auto max-w-2xl">
+        {/* Logo and Back Button Header */}
+        <header className="flex items-center mb-4 relative">
+          <button 
+            onClick={() => router.push('/')}
+            className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center justify-center absolute left-0"
+            aria-label="Go back"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <div className="w-full flex justify-center">
+            <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
           </div>
+        </header>
+        
+        <div className="w-full mb-6">
+          <FrameUI frameState={frameState} components={components} theme={theme} />
         </div>
-        <p className="text-gray-700 mb-2">Frame URL: {frame.url}</p>
-      </div>
 
-      <div className="w-full max-w-md mx-auto">
-        <FrameUI frameState={frameState} components={components} theme={theme} />
+        {/* Separator */}
+        <div className="border-t border-[#2A2A3C] mb-6"></div>
+
+        <div>
+          <div className="flex items-center mb-3">
+            {frame.icon_url && (
+              <img 
+                src={frame.icon_url} 
+                alt={frame.name} 
+                className="w-12 h-12 rounded-full mr-4"
+                onError={(e) => {
+                  e.currentTarget.src = "https://placehold.co/64x64?text=F";
+                }}
+              />
+            )}
+            <div>
+              <h1 className="text-2xl font-bold">{frame.name}</h1>
+              <p 
+                onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
+                className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}
+              >
+                @{frame.creator_name}
+              </p>
+            </div>
+          </div>
+          
+          {/* Frame Description */}
+          {frame.description && (
+            <div className="mt-4 text-gray-300">
+              <p>{frame.description}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
