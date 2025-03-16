@@ -244,16 +244,23 @@ export default function FrameView() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
-              {frame.icon_url && (
-                <img 
-                  src={frame.icon_url} 
-                  alt={frame.name} 
-                  className="w-12 h-12 rounded-full mr-4"
-                  onError={(e) => {
-                    e.currentTarget.src = "https://placehold.co/64x64?text=F";
-                  }}
-                />
-              )}
+              {/* Frame Icon - Match the styling from the home page */}
+              <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden mr-4">
+                {frame.icon_url ? (
+                  <img 
+                    src={frame.icon_url} 
+                    alt={frame.name} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://placehold.co/64x64?text=F";
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-600 flex items-center justify-center text-lg">
+                    F
+                  </div>
+                )}
+              </div>
               <div>
                 <h1 className="text-2xl font-bold">{frame.name}</h1>
                 <p 

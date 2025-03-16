@@ -33,6 +33,7 @@ export default function HomePage() {
   const [isLoadingTags, setIsLoadingTags] = useState(true);
   const [isLoadingFrames, setIsLoadingFrames] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [shareStatuses, setShareStatuses] = useState<Record<string, string | null>>({});
 
   // Fetch tags
   useEffect(() => {
@@ -94,6 +95,56 @@ export default function HomePage() {
     if (profileUrl) {
       e.preventDefault(); // Prevent the parent Link from navigating
       window.open(profileUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+  
+  // Function to handle share button click
+  const handleShareClick = (e: React.MouseEvent, frameId: string) => {
+    e.preventDefault(); // Prevent the parent Link from navigating
+    const shareUrl = `${window.location.origin}/frame/${encodeURIComponent(frameId)}`;
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => {
+          setShareStatuses(prev => ({ ...prev, [frameId]: 'Copied!' }));
+          setTimeout(() => {
+            setShareStatuses(prev => ({ ...prev, [frameId]: null }));
+          }, 3000);
+        })
+        .catch(err => {
+          console.error('Failed to copy URL: ', err);
+          setShareStatuses(prev => ({ ...prev, [frameId]: 'Failed to copy' }));
+          setTimeout(() => {
+            setShareStatuses(prev => ({ ...prev, [frameId]: null }));
+          }, 3000);
+        });
+    } else {
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      textArea.style.position = 'fixed';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        setShareStatuses(prev => ({ 
+          ...prev, 
+          [frameId]: successful ? 'Copied!' : 'Failed to copy' 
+        }));
+        setTimeout(() => {
+          setShareStatuses(prev => ({ ...prev, [frameId]: null }));
+        }, 3000);
+      } catch (err) {
+        console.error('Failed to copy URL: ', err);
+        setShareStatuses(prev => ({ ...prev, [frameId]: 'Failed to copy' }));
+        setTimeout(() => {
+          setShareStatuses(prev => ({ ...prev, [frameId]: null }));
+        }, 3000);
+      }
+      
+      document.body.removeChild(textArea);
     }
   };
 
@@ -185,47 +236,65 @@ export default function HomePage() {
           <div className="flex flex-col">
             {frames.map((frame: Frame, index: number) => (
               <div key={frame.id}>
-                <Link
-                  href={`/frame/${encodeURIComponent(frame.id)}`}
-                  className="flex items-start py-4 hover:opacity-80 transition-opacity"
-                >
-                  {/* Frame Icon */}
-                  <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
-                    {frame.icon_url ? (
-                      <Image
-                        src={frame.icon_url}
-                        alt={frame.name}
-                        width={64}
-                        height={64}
-                        className="object-cover"
-                        unoptimized={true}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-600 flex items-center justify-center text-lg">
-                        F
-                      </div>
-                    )}
-                  </div>
+                <div className="flex items-start py-4 relative">
+                  {/* Frame Icon - Using Link for the icon and title only */}
+                  <Link
+                    href={`/frame/${encodeURIComponent(frame.id)}`}
+                    className="flex items-start hover:opacity-80 transition-opacity flex-grow"
+                  >
+                    <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+                      {frame.icon_url ? (
+                        <Image
+                          src={frame.icon_url}
+                          alt={frame.name}
+                          width={64}
+                          height={64}
+                          className="object-cover"
+                          unoptimized={true}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-600 flex items-center justify-center text-lg">
+                          F
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Frame Info */}
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold">{frame.name}</h3>
-                    
-                    {/* Description */}
-                    {frame.description && (
-                      <p className="text-gray-400 text-sm mt-1 mb-1 line-clamp-2">
-                        {frame.description}
+                    {/* Frame Info */}
+                    <div className="ml-4 flex-grow">
+                      <h3 className="text-lg font-semibold">{frame.name}</h3>
+                      
+                      {/* Description */}
+                      {frame.description && (
+                        <p className="text-gray-400 text-sm mt-1 mb-1 line-clamp-2">
+                          {frame.description}
+                        </p>
+                      )}
+                      
+                      <p 
+                        onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
+                        className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}
+                      >
+                        @{frame.creator_name}
                       </p>
-                    )}
-                    
-                    <p 
-                      onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
-                      className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}
+                    </div>
+                  </Link>
+                  
+                  {/* Share Button */}
+                  <div className="flex items-center ml-2">
+                    <button 
+                      onClick={(e) => handleShareClick(e, frame.id)}
+                      className="p-2 bg-[#1D1D29] text-white rounded-full hover:bg-[#2A2A3C] flex items-center justify-center border border-[#2A2A3C]"
+                      aria-label="Share frame"
                     >
-                      @{frame.creator_name}
-                    </p>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                    </button>
+                    {shareStatuses[frame.id] && (
+                      <span className="ml-2 text-green-400 text-xs">{shareStatuses[frame.id]}</span>
+                    )}
                   </div>
-                </Link>
+                </div>
                 
                 {/* Add separator line after each item except the last one */}
                 {index < frames.length - 1 && (
