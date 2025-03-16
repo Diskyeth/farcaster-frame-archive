@@ -153,8 +153,13 @@ export default function HomePage() {
   if (isLoading && frames.length === 0) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-[#10001D]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-4"></div>
-        <p className="text-white text-lg">Loading...</p>
+        <div className="mb-6">
+          <svg className="animate-spin" width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
+                  fill="#8C56FF" stroke="#8C56FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <p className="text-white text-lg">Loading Frames...</p>
       </div>
     );
   }
@@ -230,7 +235,10 @@ export default function HomePage() {
       <section className="max-w-2xl mx-auto">
         {isLoadingFrames ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+            <svg className="animate-spin" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
+                    fill="#8C56FF" stroke="#8C56FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         ) : (
           <div className="flex flex-col">

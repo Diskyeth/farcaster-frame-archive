@@ -39,8 +39,8 @@ const components: FrameUIComponents<StylingProps> = {
 };
 
 const theme: FrameUITheme<StylingProps> = {
-  ButtonsContainer: { className: "flex gap-2 px-2 pb-2 bg-[#14141b]" },
-  Button: { className: "border text-sm text-white rounded flex-1 bg-[#14141b] border-[#2A2A3C] p-2 hover:bg-[#1b1b24]" },
+  ButtonsContainer: { className: "flex gap-3 px-3 pb-3 bg-[#14141b]" },
+  Button: { className: "border text-base text-white rounded flex-1 bg-[#222232] border-[#3A3A4C] py-3 px-4 hover:bg-[#2A2A3C] font-medium" },
   Root: { className: "flex flex-col w-full gap-2 border rounded-lg overflow-hidden bg-[#14141b] relative border-[#2A2A3C]" },
   Error: { className: "flex text-red-500 text-sm p-2 bg-[#14141b] border border-red-500 rounded-md shadow-md aspect-square justify-center items-center" },
   LoadingScreen: { className: "absolute inset-0 bg-[#14141b] z-10" },
@@ -190,8 +190,13 @@ export default function FrameView() {
   if (isLoading) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-[#10001D]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-4"></div>
-        <p className="text-white text-lg">Loading...</p>
+        <div className="mb-6">
+          <svg className="animate-spin" width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
+                  fill="#8C56FF" stroke="#8C56FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <p className="text-white text-lg">Loading Frame...</p>
       </div>
     );
   }
