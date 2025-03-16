@@ -7,7 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 
 type Tag = {
   id: string;
-  name: string;
+  name: string; //
   slug: string;
 };
 
