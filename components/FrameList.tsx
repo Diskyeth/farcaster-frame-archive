@@ -1,3 +1,4 @@
+// components/FrameList.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -13,10 +14,28 @@ type Frame = {
   created_at: string;
 };
 
-export default function HomePage() {
+export default function FrameList() {
   const [frames, setFrames] = useState<Frame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Initialize Farcaster SDK
+  useEffect(() => {
+    const initFarcaster = async () => {
+      try {
+        const { default: sdk } = await import('@farcaster/frame-sdk');
+        
+        // Initialize the frame SDK and signal readiness
+        await sdk.context;
+        sdk.actions.ready();
+      } catch (error) {
+        console.error("Not in a Farcaster frame context:", error);
+        // Most likely not in a Farcaster frame context, which is fine
+      }
+    };
+    
+    initFarcaster();
+  }, []);
 
   useEffect(() => {
     const fetchFrames = async () => {
