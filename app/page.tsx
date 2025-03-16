@@ -45,7 +45,10 @@ export default function HomePage() {
 
         const data = await response.json();
         console.log("Received tags:", data.tags);
-        setTags(data.tags);
+        
+        // Filter out any "all" tag if it exists in the API response
+        const filteredTags = data.tags.filter(tag => tag.slug !== 'all');
+        setTags(filteredTags);
       } catch (err) {
         console.error("Error fetching tags:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -98,32 +101,44 @@ export default function HomePage() {
 
   if (isLoading && frames.length === 0) {
     return (
-      <div className="flex justify-center items-center h-screen bg-[#10001D]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      <div className="flex flex-col justify-center items-center h-screen bg-[#10001D]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-4"></div>
+        <p className="text-white text-lg">Loading...</p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-[#10001D] text-white px-4 py-8">
-      {/* Header with Logo and Add Frame button */}
+      {/* Header with Logo and Buttons */}
       <header className="max-w-2xl mx-auto mb-8 flex items-center justify-between">
         <div>
           <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
         </div>
-        <a 
-  href="https://forms.gle/oqpNiuK6vkveHhNv9" 
-  onClick={(e) => {
-    e.preventDefault();
-    window.open("https://forms.gle/oqpNiuK6vkveHhNv9", "_top");
-  }}
-  className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
->
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-  </svg>
-  Submit
-</a>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push('/load-frame')}
+            className="px-4 py-2 bg-[#1D1D29] text-white rounded-full hover:bg-[#2A2A3C] flex items-center gap-2 border border-[#2A2A3C]"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Load
+          </button>
+          <a 
+            href="https://forms.gle/oqpNiuK6vkveHhNv9" 
+            onClick={(e) => {
+              e.preventDefault();
+              window.open("https://forms.gle/oqpNiuK6vkveHhNv9", "_top");
+            }}
+            className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Submit
+          </a>
+        </div>
       </header>
 
       {/* Disclaimer Text */}
@@ -133,7 +148,20 @@ export default function HomePage() {
       
       {/* Tag Filters */}
       <div className="flex flex-wrap justify-center gap-2 mb-4">
-        {tags.length > 0 ? (
+        {/* All tag as a single button */}
+        <button
+          onClick={() => handleTagChange('all')}
+          className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+            currentTag === 'all'
+              ? 'bg-[#8C56FF] text-white'
+              : 'bg-[#1D1D29] text-white hover:bg-[#2A2A3C]'
+          }`}
+        >
+          All
+        </button>
+        
+        {/* Other tag buttons */}
+        {tags.length > 0 && 
           tags.map((tag) => (
             <button
               key={tag.id}
@@ -147,9 +175,7 @@ export default function HomePage() {
               {tag.name}
             </button>
           ))
-        ) : (
-          <div className="text-gray-400">No tags available</div>
-        )}
+        }
       </div>
 
       {/* Frame List */}
