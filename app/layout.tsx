@@ -29,13 +29,13 @@ export const metadata: Metadata = {
   },
   other: {
     "fc:frame": "v2",
-    "fc:frame:image": "https://yourdomain.com/api/frame-image",
-    "fc:frame:post_url": "https://yourdomain.com/api/frame",
+    "fc:frame:image": "https://farcaster-frame-archive.vercel.app/",
+    "fc:frame:post_url": "https://farcaster-frame-archive.vercel.app/",
     "fc:frame:button:1": "Load Another V1 Frame",
     "fc:frame:button:1:action": "post",
     "fc:frame:button:2": "Visit V1 Frame",
     "fc:frame:button:2:action": "link",
-    "fc:frame:button:2:target": "https://framesjs.org",
+    "fc:frame:button:2:target": "https://farcaster-frame-archive.vercel.app/",
   },
 };
 
