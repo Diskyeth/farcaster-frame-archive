@@ -5,10 +5,10 @@ import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: 'Legacy Frames',
-  description: 'A V1 legacy frames archive.',
+  description: 'Explore legacy frames.',
   openGraph: {
     title: 'Legacy Frames',
-    description: 'A V1 legacy frames archive.',
+    description: 'Explore legacy frames.',
     images: ['/icon.png'],
   },
   other: {
@@ -16,13 +16,13 @@ export const metadata: Metadata = {
       version: 'next',
       imageUrl: 'https://legacyframes.xyz/banner.png',
       button: {
-        title: 'A V1 legacy frames archive.',
+        title: 'Explore legacy frames.',
         action: {
           type: 'launch_frame',
           name: 'Legacy Frames',
           url: 'https://legacyframes.xyz/',
           splashImageUrl: 'https://legacyframes.xyz/icon.png',
-          splashBackgroundColor: '#151515',
+          splashBackgroundColor: '#10001D',
         },
       },
     }),

@@ -12,7 +12,7 @@
       "imageUrl": "https://legacyframes.xyz/banner.png",
       "buttonTitle": "Check this out",
       "splashImageUrl": "https://legacyframes.xyz/icon.png",
-      "splashBackgroundColor": "#eeccff",
+      "splashBackgroundColor": "#10001D",
       "webhookUrl": "https://legacyframes.xyz/api/webhook"
     }
   }

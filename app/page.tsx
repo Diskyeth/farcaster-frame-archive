@@ -112,16 +112,18 @@ export default function HomePage() {
           <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
         </div>
         <a 
-          href="https://forms.gle/oqpNiuK6vkveHhNv9" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Submit Frame
-        </a>
+  href="https://forms.gle/oqpNiuK6vkveHhNv9" 
+  onClick={(e) => {
+    e.preventDefault();
+    window.open("https://forms.gle/oqpNiuK6vkveHhNv9", "_top");
+  }}
+  className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+  </svg>
+  Submit
+</a>
       </header>
 
       {/* Disclaimer Text */}
