@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   },
   other: {
     ['fc:frame']: JSON.stringify({
-      version: '1',
+      version: '2',  // Changed from '1' to '2'
       imageUrl: 'https://legacyframes.xyz/banner.png',
       button: {
         title: 'Explore Legacy Frames',
@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     }),
   },
 }
+
 export default function RootLayout({
   children,
 }: Readonly<{
