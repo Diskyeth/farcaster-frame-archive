@@ -8,6 +8,9 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+// Get the base URL from environment or use a placeholder
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://farcaster-frame-archive.vercel.app/';
+
 export const metadata: Metadata = {
   title: "Frame Archive",
   description: "Browse and interact with Farcaster Frames",
@@ -16,7 +19,7 @@ export const metadata: Metadata = {
     description: "Browse and interact with Farcaster Frames",
     images: [
       {
-        url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-domain.com'}/api/og`,
+        url: `${baseUrl}/api/og`,
         width: 1200,
         height: 630,
         alt: "Frame Archive",
@@ -26,8 +29,8 @@ export const metadata: Metadata = {
   // Farcaster Frame metadata
   other: {
     "fc:frame": "vNext",
-    "fc:frame:image": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-domain.com'}/api/og`,
-    "fc:frame:post_url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-domain.com'}/api/frame-action`,
+    "fc:frame:image": `${baseUrl}/api/og`,
+    "fc:frame:post_url": `${baseUrl}/api/frame-action`,
     "fc:frame:button:1": "Browse Frames",
     "fc:frame:button:1:action": "post",
     "fc:frame:input:text": "Search frames...",

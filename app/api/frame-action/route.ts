@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
+export const runtime = 'nodejs';
+
 export async function POST(req: NextRequest) {
   try {
     // Parse the frame message
@@ -46,16 +48,16 @@ export async function POST(req: NextRequest) {
     
     // Generate the frame response
     return NextResponse.json({
-      frames: frames,
+      frames: responseFrames,
       frameMetadata: {
         buttons: responseFrames.map((frame, index) => ({
           label: frame.name,
           action: "link",
           target: `${baseUrl}/frame/${frame.id}`
-        })).concat({
+        })).concat(responseFrames.length === 6 ? [{
           label: "More Frames",
           action: "post"
-        }),
+        }] : []),
         image: {
           url: `${baseUrl}/api/og?t=${Date.now()}`,
           aspectRatio: "1.91:1"

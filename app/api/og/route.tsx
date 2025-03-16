@@ -3,7 +3,8 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { query } from '@/lib/db';
 
-export const runtime = 'edge';
+// Use the Node.js runtime instead of Edge
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
