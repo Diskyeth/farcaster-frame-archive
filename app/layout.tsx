@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   },
   other: {
     ['fc:frame']: JSON.stringify({
-      version: 'next',
+      version: '1.1',
       imageUrl: 'https://legacyframes.xyz/banner.png',
       button: {
         title: 'Explore Legacy Frames',

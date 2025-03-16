@@ -105,13 +105,26 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#10001D] text-white px-4 py-8">
-      {/* Centered Logo */}
-      <header className="flex justify-center mb-8">
-        <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
+      {/* Header with Logo and Add Frame button */}
+      <header className="max-w-2xl mx-auto 4 flex items-center relative">
+        <div className="w-full flex justify-center">
+          <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
+        </div>
+        <a 
+          href="https://example.com/add-frame" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2 absolute right-0"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add Frame
+        </a>
       </header>
 
       {/* Tag Filters */}
-      <div className="flex flex-wrap justify-center gap-2 mb-8">
+      <div className="flex flex-wrap justify-center gap-2 mb-4">
         {tags.length > 0 ? (
           tags.map((tag) => (
             <button
@@ -129,6 +142,11 @@ export default function HomePage() {
         ) : (
           <div className="text-gray-400">No tags available</div>
         )}
+      </div>
+
+      {/* Disclaimer Text */}
+      <div className="text-center text-gray-400 text-sm mb-4 max-w-2xl mx-auto">
+        <p>This project was created to preserve the legacy of the V1 frame in Farcaster. However, there are no guarantees that each frame will continue to work as intended..</p>
       </div>
 
       {/* Frame List */}
