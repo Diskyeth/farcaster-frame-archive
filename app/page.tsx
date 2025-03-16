@@ -19,6 +19,7 @@ const frame = {
 };
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 type Frame = {
   id: string;
   name: string;
@@ -30,6 +31,9 @@ type Frame = {
   tags?: string[];
   description?: string; // Added description field
 };
+=======
+export const revalidate = 300;
+>>>>>>> Stashed changes
 =======
 export const revalidate = 300;
 >>>>>>> Stashed changes
@@ -49,6 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
   // Function to handle creator name click
   const handleCreatorClick = (e: React.MouseEvent, profileUrl: string | undefined) => {
@@ -183,6 +188,11 @@ export async function generateMetadata(): Promise<Metadata> {
       </section>
     </div>
   );
+=======
+// This is the main page server component
+export default function Page() {
+  return <HomePage />;
+>>>>>>> Stashed changes
 =======
 // This is the main page server component
 export default function Page() {
