@@ -1,18 +1,18 @@
 {
-    "accountAssociation": {
-      "header": "eyJmaWQiOjM4OTgwOCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDFDODdFMjdGOWQ5RDczZTAyNDEwQjAwQzE5NmVBNjQwNzk1REYxZDIifQ",
-      "payload": "eyJkb21haW4iOiJsZWdhY3lmcmFtZXMueHl6In0",
-      "signature": "MHg5MzI5OGE2MDk0NjcxODdkOTRkZjkxNzMzMGI3YWM3YzNkOThlNzdhODNhMGYxMzRjOTUwYWFkYWJiMTU5YTIxMWFlM2IxNDdiZjc5ODI1YTJlYWVkYmU2YTFlYmY0ZTUwYThjMTllM2FjZTVmYWY2OWM2YTBhZWRhYzhjYTYxYzFj"
-    },
-    "frame": {
-      "version": "1",
-      "name": "Legacy Frames Archive",
-      "iconUrl": "https://legacyframes.xyz/icon.png",
-      "homeUrl": "https://legacyframes.xyz",
-      "imageUrl": "https://legacyframes.xyz/banner.png",
-      "buttonTitle": "Check this out",
-      "splashImageUrl": "https://legacyframes.xyz/icon.png",
-      "splashBackgroundColor": "#10001D",
-      "webhookUrl": "https://legacyframes.xyz/api/webhook"
-    }
+  "accountAssociation": {
+    "header": "eyJmaWQiOjM4OTgwOCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDFDODdFMjdGOWQ5RDczZTAyNDEwQjAwQzE5NmVBNjQwNzk1REYxZDIifQ",
+    "payload": "eyJkb21haW4iOiJsZWdhY3lmcmFtZXMueHl6In0",
+    "signature": "MHg5MzI5OGE2MDk0NjcxODdkOTRkZjkxNzMzMGI3YWM3YzNkOThlNzdhODNhMGYxMzRjOTUwYWFkYWJiMTU5YTIxMWFlM2IxNDdiZjc5ODI1YTJlYWVkYmU2YTFlYmY0ZTUwYThjMTllM2FjZTVmYWY2OWM2YTBhZWRhYzhjYTYxYzFj"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Legacy Frames",
+    "iconUrl": "https://legacyframes.xyz/icon.png",
+    "homeUrl": "https://legacyframes.xyz",
+    "imageUrl": "https://legacyframes.xyz/banner.png",
+    "buttonTitle": "Check this out",
+    "splashImageUrl": "https://legacyframes.xyz/icon.png",
+    "splashBackgroundColor": "#eeccff",
+    "webhookUrl": "https://legacyframes.xyz/api/webhook"
   }
+}

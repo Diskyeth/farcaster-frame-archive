@@ -13,14 +13,14 @@ export const metadata: Metadata = {
   },
   other: {
     ['fc:frame']: JSON.stringify({
-      version: '1.1',
+      version: '1',
       imageUrl: 'https://legacyframes.xyz/banner.png',
       button: {
         title: 'Explore Legacy Frames',
         action: {
           type: 'launch_frame',
           name: 'Legacy Frames',
-          url: 'https://legacyframes.xyz/',
+          url: 'https://legacyframes.xyz',
           splashImageUrl: 'https://legacyframes.xyz/icon.png',
           splashBackgroundColor: '#10001D',
         },
