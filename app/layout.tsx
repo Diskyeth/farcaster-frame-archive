@@ -5,10 +5,10 @@ import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: 'Legacy Frames',
-  description: 'Explore Legacy Frames',
+  description: 'Explore legacy frames.',
   openGraph: {
     title: 'Legacy Frames',
-    description: 'Explore Legacy Frames',
+    description: 'Explore legacy frames.',
     images: ['/icon.png'],
   },
   other: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
       version: '2',  // Changed from '1' to '2'
       imageUrl: 'https://legacyframes.xyz/banner.png',
       button: {
-        title: 'Explore Legacy Frames',
+        title: 'Explore legacy frames.',
         action: {
           type: 'launch_frame',
           name: 'Legacy Frames',
