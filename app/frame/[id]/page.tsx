@@ -16,6 +16,11 @@ type StylingProps = {
   style?: React.CSSProperties;
 };
 
+// Define any missing types
+type FarcasterSignerApproved = FarcasterSigner & { status: "approved" };
+type FrameActionBodyPayload = any;
+type SupportedParsingSpecification = "farcaster-signature";
+
 const components: FrameUIComponents<StylingProps> = {
   Image: (props, stylingProps) => {
     if (props.status === "frame-loading") return <></>;
@@ -100,23 +105,33 @@ export default function FrameView() {
     fetchFrame();
   }, [frameId]);
 
-  // Use any type to bypass type checking for signerState
+  // Use explicitly typed signerState
   const signerState: any = {
     hasSigner: farcasterSigner.status === "approved",
-    signer: farcasterSigner,
+    signer: farcasterSigner as FarcasterSignerApproved,
     isLoadingSigner: false,
-    specification: "farcaster-signature",
-
-    async onSignerlessFramePress() {
-      console.log("A frame button was pressed without a signer.");
+    specification: "farcaster-signature" as SupportedParsingSpecification,
+    
+    async onSignerlessFramePress(frameButton: any) {
+      console.log("Button pressed without signer:", frameButton);
     },
-
-    signFrameAction,
-
+    
+    signFrameAction: async (args: any) => {
+      try {
+        console.log("Signing frame action:", args);
+        const result = await signFrameAction(args);
+        console.log("Sign result:", result);
+        return result;
+      } catch (err) {
+        console.error("Error signing frame action:", err);
+        throw err;
+      }
+    },
+    
     async logout() {
       console.log("logout");
     },
-
+    
     withContext: (context: FrameContext) => ({
       signerState,
       frameContext: context,
@@ -152,11 +167,11 @@ export default function FrameView() {
           <p>Error: {error || 'Frame not found'}</p>
         </div>
         <button 
-  onClick={() => router.push('/frame-list')} 
-  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
->
-  Back to Frames List
-</button>
+          onClick={() => router.push('/frame-list')} 
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Back to Frames List
+        </button>
       </div>
     );
   }
