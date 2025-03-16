@@ -23,6 +23,7 @@ type Frame = {
   icon_url: string;
   created_at: string;
   tags?: string[];
+  description?: string; // Make sure description is included in the type
 };
 
 export default function HomePage() {
@@ -164,7 +165,7 @@ export default function HomePage() {
               <div key={frame.id}>
                 <Link
                   href={`/frame/${encodeURIComponent(frame.id)}`}
-                  className="flex items-center py-4 hover:opacity-80 transition-opacity"
+                  className="flex items-start py-4 hover:opacity-80 transition-opacity"
                 >
                   {/* Frame Icon */}
                   <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
@@ -187,6 +188,14 @@ export default function HomePage() {
                   {/* Frame Info */}
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold">{frame.name}</h3>
+                    
+                    {/* Description - Added this section */}
+                    {frame.description && (
+                      <p className="text-gray-400 text-sm mt-1 mb-1 line-clamp-2">
+                        {frame.description}
+                      </p>
+                    )}
+                    
                     <p 
                       onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
                       className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}
