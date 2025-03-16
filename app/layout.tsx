@@ -1,5 +1,6 @@
+// app/layout.tsx
 import type { Metadata } from "next";
-import { Inter, Fira_Code } from "next/font/google"; // ✅ Replace Geist with Inter & Fira Code
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,27 +8,27 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const firaCode = Fira_Code({
-  subsets: ["latin"],
-  variable: "--font-fira-mono",
-});
+// Get base URL from environment variables
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://your-domain.com';
 
 export const metadata: Metadata = {
-  title: "Farcaster V2 Frame",
-  description: "View V1 Frames inside a V2 Frame",
+  title: "Frame Archive",
+  description: "Browse and interact with Farcaster Frames",
   openGraph: {
-    title: "Farcaster V2 Frame",
-    description: "Load and interact with V1 Frames inside a V2 Frame.",
+    title: "Frame Archive",
+    description: "Browse and interact with Farcaster Frames",
     images: [
       {
-        url: "https://yourdomain.com/api/frame-image",
+        url: `${baseUrl}/api/og`,
         width: 1200,
         height: 630,
-        alt: "Farcaster Frame Preview",
+        alt: "Frame Archive",
       },
     ],
   },
+  // Farcaster Frame metadata
   other: {
+
     "fc:frame": "v2",
     "fc:frame:image": "https://farcaster-frame-archive.vercel.app/",
     "fc:frame:post_url": "https://farcaster-frame-archive.vercel.app/",
@@ -46,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${firaCode.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased`}>
         {children}
       </body>
     </html>
