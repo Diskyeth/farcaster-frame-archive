@@ -76,7 +76,7 @@ export default function FrameList() {
   return (
     <div className="min-h-screen bg-[#10001D] text-white px-4 py-8">
       {/* Centered Logo */}
-      <header className="flex justify-center mb-8">
+      <header className="flex justify-center mb-4">
         <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
       </header>
 
