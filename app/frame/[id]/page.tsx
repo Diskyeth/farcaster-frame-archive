@@ -68,6 +68,7 @@ export default function FrameView() {
   const [frame, setFrame] = useState<Frame | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
 
   // Set up Farcaster signer
   const farcasterSigner: FarcasterSigner = {
@@ -111,6 +112,44 @@ export default function FrameView() {
     }
   };
 
+  // Function to handle share button click
+  const handleShareClick = () => {
+    const currentUrl = window.location.href;
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(currentUrl)
+        .then(() => {
+          setShareStatus('URL copied to clipboard!');
+          setTimeout(() => setShareStatus(null), 3000);
+        })
+        .catch(err => {
+          console.error('Failed to copy URL: ', err);
+          setShareStatus('Failed to copy URL');
+          setTimeout(() => setShareStatus(null), 3000);
+        });
+    } else {
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement('textarea');
+      textArea.value = currentUrl;
+      textArea.style.position = 'fixed';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        setShareStatus(successful ? 'URL copied to clipboard!' : 'Failed to copy URL');
+        setTimeout(() => setShareStatus(null), 3000);
+      } catch (err) {
+        console.error('Failed to copy URL: ', err);
+        setShareStatus('Failed to copy URL');
+        setTimeout(() => setShareStatus(null), 3000);
+      }
+      
+      document.body.removeChild(textArea);
+    }
+  };
+
   // Use any type to bypass type checking for signerState
   const signerState: any = {
     hasSigner: farcasterSigner.status === "approved",
@@ -150,8 +189,9 @@ export default function FrameView() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-[#10001D]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      <div className="flex flex-col justify-center items-center h-screen bg-[#10001D]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-4"></div>
+        <p className="text-white text-lg">Loading...</p>
       </div>
     );
   }
@@ -202,34 +242,55 @@ export default function FrameView() {
         <div className="border-t border-[#2A2A3C] mb-6"></div>
 
         <div>
-          <div className="flex items-center mb-3">
-            {frame.icon_url && (
-              <img 
-                src={frame.icon_url} 
-                alt={frame.name} 
-                className="w-12 h-12 rounded-full mr-4"
-                onError={(e) => {
-                  e.currentTarget.src = "https://placehold.co/64x64?text=F";
-                }}
-              />
-            )}
-            <div>
-              <h1 className="text-2xl font-bold">{frame.name}</h1>
-              <p 
-                onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
-                className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center">
+              {frame.icon_url && (
+                <img 
+                  src={frame.icon_url} 
+                  alt={frame.name} 
+                  className="w-12 h-12 rounded-full mr-4"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://placehold.co/64x64?text=F";
+                  }}
+                />
+              )}
+              <div>
+                <h1 className="text-2xl font-bold">{frame.name}</h1>
+                <p 
+                  onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
+                  className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}
+                >
+                  @{frame.creator_name}
+                </p>
+              </div>
+            </div>
+            
+            {/* Share Frame Button */}
+            <div className="flex items-center">
+              <button 
+                onClick={handleShareClick}
+                className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center justify-center gap-2"
+                aria-label="Share frame"
               >
-                @{frame.creator_name}
-              </p>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                Share
+              </button>
+              {shareStatus && (
+                <span className="ml-3 text-green-400 text-sm">{shareStatus}</span>
+              )}
             </div>
           </div>
           
           {/* Frame Description */}
-          {frame.description && (
-            <div className="mt-4 text-gray-300">
-              <p>{frame.description}</p>
-            </div>
-          )}
+          <div className="mt-4">
+            {frame.description && (
+              <div className="text-gray-300">
+                <p>{frame.description}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
