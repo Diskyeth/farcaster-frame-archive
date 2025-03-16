@@ -28,12 +28,15 @@ export const metadata: Metadata = {
   },
   // Farcaster Frame metadata
   other: {
-    "fc:frame": "vNext",
-    "fc:frame:image": `${baseUrl}/api/og`,
-    "fc:frame:post_url": `${baseUrl}/api/frame-action`,
-    "fc:frame:button:1": "Browse Frames",
+
+    "fc:frame": "v2",
+    "fc:frame:image": "https://farcaster-frame-archive.vercel.app/",
+    "fc:frame:post_url": "https://farcaster-frame-archive.vercel.app/",
+    "fc:frame:button:1": "Load Another V1 Frame",
     "fc:frame:button:1:action": "post",
-    "fc:frame:input:text": "Search frames...",
+    "fc:frame:button:2": "Visit V1 Frame",
+    "fc:frame:button:2:action": "link",
+    "fc:frame:button:2:target": "https://farcaster-frame-archive.vercel.app/",
   },
 };
 
