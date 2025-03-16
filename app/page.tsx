@@ -20,6 +20,7 @@ type Frame = {
   icon_url: string;
   created_at: string;
   tags?: string[];
+  description?: string; // Added description field
 };
 
 export default function HomePage() {
@@ -106,23 +107,28 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#10001D] text-white px-4 py-8">
       {/* Header with Logo and Add Frame button */}
-      <header className="max-w-2xl mx-auto 4 flex items-center relative">
-        <div className="w-full flex justify-center">
+      <header className="max-w-2xl mx-auto mb-8 flex items-center justify-between">
+        <div>
           <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
         </div>
         <a 
-          href="https://example.com/add-frame" 
+          href="https://forms.gle/oqpNiuK6vkveHhNv9" 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2 absolute right-0"
+          className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Add Frame
+          Submit Frame
         </a>
       </header>
 
+      {/* Disclaimer Text */}
+      <div className="text-gray-400 text-sm mb-6 max-w-2xl mx-auto">
+        <p>This project was created to preserve the legacy of the V1 frame in Farcaster. However, there are no guarantees that each frame will continue to work as intended.</p>
+      </div>
+      
       {/* Tag Filters */}
       <div className="flex flex-wrap justify-center gap-2 mb-4">
         {tags.length > 0 ? (
@@ -144,11 +150,6 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Disclaimer Text */}
-      <div className="text-center text-gray-400 text-sm mb-4 max-w-2xl mx-auto">
-        <p>This project was created to preserve the legacy of the V1 frame in Farcaster. However, there are no guarantees that each frame will continue to work as intended..</p>
-      </div>
-
       {/* Frame List */}
       <section className="max-w-2xl mx-auto">
         {isLoadingFrames ? (
@@ -161,7 +162,7 @@ export default function HomePage() {
               <div key={frame.id}>
                 <Link
                   href={`/frame/${encodeURIComponent(frame.id)}`}
-                  className="flex items-center py-4 hover:opacity-80 transition-opacity"
+                  className="flex items-start py-4 hover:opacity-80 transition-opacity"
                 >
                   {/* Frame Icon */}
                   <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
@@ -184,6 +185,14 @@ export default function HomePage() {
                   {/* Frame Info */}
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold">{frame.name}</h3>
+                    
+                    {/* Description */}
+                    {frame.description && (
+                      <p className="text-gray-400 text-sm mt-1 mb-1 line-clamp-2">
+                        {frame.description}
+                      </p>
+                    )}
+                    
                     <p 
                       onClick={(e) => handleCreatorClick(e, frame.creator_profile_url)}
                       className={`text-[#8C56FF] text-sm ${frame.creator_profile_url ? 'cursor-pointer hover:underline' : ''}`}

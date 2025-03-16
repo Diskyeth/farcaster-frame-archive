@@ -57,6 +57,7 @@ type Frame = {
   creator_profile_url?: string;
   url: string;
   icon_url: string;
+  description?: string; // Added description field
 };
 
 export default function FrameView() {
@@ -181,12 +182,12 @@ export default function FrameView() {
         <header className="flex items-center mb-4 relative">
           <button 
             onClick={() => router.push('/')}
-            className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2 absolute left-0"
+            className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center justify-center absolute left-0"
+            aria-label="Go back"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back
           </button>
           <div className="w-full flex justify-center">
             <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
@@ -197,7 +198,10 @@ export default function FrameView() {
           <FrameUI frameState={frameState} components={components} theme={theme} />
         </div>
 
-        <div className="mt-6">
+        {/* Separator */}
+        <div className="border-t border-[#2A2A3C] mb-6"></div>
+
+        <div>
           <div className="flex items-center mb-3">
             {frame.icon_url && (
               <img 
@@ -219,9 +223,13 @@ export default function FrameView() {
               </p>
             </div>
           </div>
-          <div className="mt-2 text-gray-400 text-sm">
-            <p>Frame URL: <a href={frame.url} target="_blank" rel="noopener noreferrer" className="text-[#8C56FF] hover:underline">{frame.url}</a></p>
-          </div>
+          
+          {/* Frame Description */}
+          {frame.description && (
+            <div className="mt-4 text-gray-300">
+              <p>{frame.description}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -20,7 +20,8 @@ export async function GET(
           creator_name, 
           creator_profile_url,
           url, 
-          icon_url
+          icon_url,
+          description
         FROM frames
         WHERE id = $1`,
         [id]
