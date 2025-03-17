@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, useRouter } from 'next/navigation';
+import sdk from '@farcaster/frame-sdk';
 
 type Tag = {
   id: string;
@@ -20,7 +21,8 @@ type Frame = {
   icon_url: string;
   created_at: string;
   tags?: string[];
-  description?: string; // Added description field
+  description?: string;
+  version?: string; 
 };
 
 export default function HomePage() {
@@ -34,8 +36,23 @@ export default function HomePage() {
   const [isLoadingFrames, setIsLoadingFrames] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [shareStatuses, setShareStatuses] = useState<Record<string, string | null>>({});
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
 
-  // Fetch tags
+
+  useEffect(() => {
+    const loadSDK = async () => {
+      try {
+        await sdk.context;
+        setIsSDKLoaded(true);
+      } catch (err) {
+        console.error("Failed to load Frame SDK:", err);
+      }
+    };
+    
+    loadSDK();
+  }, []);
+
+
   useEffect(() => {
     const fetchTags = async () => {
       setIsLoadingTags(true);
@@ -47,7 +64,7 @@ export default function HomePage() {
         const data = await response.json();
         console.log("Received tags:", data.tags);
         
-        // Filter out any "all" tag if it exists in the API response
+
         const filteredTags = data.tags.filter((tag: Tag) => tag.slug !== 'all');
         setTags(filteredTags);
       } catch (err) {
@@ -61,7 +78,7 @@ export default function HomePage() {
     fetchTags();
   }, []);
 
-  // Fetch frames based on selected tag
+ 
   useEffect(() => {
     const fetchFrames = async () => {
       setIsLoadingFrames(true);
@@ -84,13 +101,13 @@ export default function HomePage() {
     fetchFrames();
   }, [currentTag]);
 
-  // Filter change handler
+ 
   const handleTagChange = (tagSlug: string) => {
     console.log(`Changing tag to: ${tagSlug}`);
     router.push(`/?tag=${tagSlug}`);
   };
 
-  // Function to handle creator name click
+  
   const handleCreatorClick = (e: React.MouseEvent, profileUrl: string | undefined) => {
     if (profileUrl) {
       e.preventDefault(); // Prevent the parent Link from navigating
@@ -98,7 +115,7 @@ export default function HomePage() {
     }
   };
   
-  // Function to handle share button click
+  
   const handleShareClick = (e: React.MouseEvent, frameId: string) => {
     e.preventDefault(); // Prevent the parent Link from navigating
     const shareUrl = `${window.location.origin}/frame/${encodeURIComponent(frameId)}`;
@@ -148,6 +165,17 @@ export default function HomePage() {
     }
   };
 
+  // Function to handle submit button click - uses SDK to open external URL
+  const handleSubmitClick = useCallback(() => {
+    if (isSDKLoaded) {
+      // Use SDK to open an external URL
+      sdk.actions.openUrl('https://forms.gle/oqpNiuK6vkveHhNv9');
+    } else {
+      // Fallback to opening in a new tab
+      window.open('https://forms.gle/oqpNiuK6vkveHhNv9', '_top');
+    }
+  }, [isSDKLoaded]);
+
   const isLoading = isLoadingTags || isLoadingFrames;
 
   if (isLoading && frames.length === 0) {
@@ -166,8 +194,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#10001D] text-white px-4 py-8">
-      {/* Header with Logo and Buttons */}
-      <header className="max-w-2xl mx-auto mb-8 flex items-center justify-between">
+    
+      <header className="max-w-2xl mx-auto mb-2 flex items-center justify-between">
         <div>
           <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
         </div>
@@ -181,22 +209,29 @@ export default function HomePage() {
             </svg>
             Load
           </button>
-          <a 
-            href="https://forms.gle/oqpNiuK6vkveHhNv9" 
-            onClick={(e) => {
-              e.preventDefault();
-              window.open("https://forms.gle/oqpNiuK6vkveHhNv9", "_top");
-            }}
+          
+          <button 
+            onClick={handleSubmitClick}
             className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
           >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
             Submit
-          </a>
+          </button>
         </div>
       </header>
 
-      {/* Disclaimer Text */}
-      <div className="text-gray-400 text-sm mb-6 max-w-2xl mx-auto">
-        <p>This project was created to preserve the legacy of the V1 frame in Farcaster. However, there are no guarantees that each frame will continue to work as intended.</p>
+      
+      <div className="text-gray-400 text-sm mb-4 max-w-2xl mx-auto mt-2">
+        <div className="bg-[#1D1D29] p-4 rounded-lg flex items-center">
+          <div className="flex-shrink-0 mr-3">
+            <svg className="h-6 w-6 text-[#8C56FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <p>This project was created to preserve the legacy of the V1 frame in Farcaster. However, there are no guarantees that each frame will continue to work as intended.</p>
+        </div>
       </div>
       
       {/* Tag Filters */}
@@ -245,7 +280,7 @@ export default function HomePage() {
             {frames.map((frame: Frame, index: number) => (
               <div key={frame.id}>
                 <div className="flex items-start py-4 relative">
-                  {/* Frame Icon - Using Link for the icon and title only */}
+                 
                   <Link
                     href={`/frame/${encodeURIComponent(frame.id)}`}
                     className="flex items-start hover:opacity-80 transition-opacity flex-grow"
@@ -267,11 +302,18 @@ export default function HomePage() {
                       )}
                     </div>
 
-                    {/* Frame Info */}
+                  
                     <div className="ml-4 flex-grow">
-                      <h3 className="text-lg font-semibold">{frame.name}</h3>
+                      <div className="flex items-center">
+                        <h3 className="text-lg font-semibold">{frame.name}</h3>
+                        {frame.version === 'v2' && (
+                          <span className="ml-2 px-2 py-0.5 bg-[#8C56FF] bg-opacity-20 text-[#8C56FF] text-xs rounded-full">
+                            V2
+                          </span>
+                        )}
+                      </div>
                       
-                      {/* Description */}
+                      
                       {frame.description && (
                         <p className="text-gray-400 text-sm mt-1 mb-1 line-clamp-2">
                           {frame.description}
@@ -287,7 +329,7 @@ export default function HomePage() {
                     </div>
                   </Link>
                   
-                  {/* Share Button */}
+                
                   <div className="flex items-center ml-2">
                     <button 
                       onClick={(e) => handleShareClick(e, frame.id)}
@@ -304,7 +346,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                {/* Add separator line after each item except the last one */}
+                
                 {index < frames.length - 1 && (
                   <div className="border-b border-[#2A2A3C]"></div>
                 )}
