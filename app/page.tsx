@@ -224,7 +224,7 @@ export default function HomePage() {
 
       
       <div className="text-gray-400 text-sm mb-4 max-w-2xl mx-auto mt-2">
-        <div className="bg-[#1D1D29] p-4 rounded-lg flex items-center">
+        <div className="bg-[#1D1D29] p-2 rounded-lg flex items-center">
           <div className="flex-shrink-0 mr-3">
             <svg className="h-6 w-6 text-[#8C56FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -254,7 +254,7 @@ export default function HomePage() {
             <button
               key={tag.id}
               onClick={() => handleTagChange(tag.slug)}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 currentTag === tag.slug
                   ? 'bg-[#8C56FF] text-white'
                   : 'bg-[#1D1D29] text-white hover:bg-[#2A2A3C]'
