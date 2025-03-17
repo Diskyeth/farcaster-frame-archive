@@ -230,7 +230,7 @@ export default function HomePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <p>This project was created to preserve the legacy of the V1 frame in Farcaster. However, there are no guarantees that each frame will continue to work as intended.</p>
+          <p>This project aims to preserve the legacy of the V1 frames on Farcaster, though continued functionality isn't guaranteed.</p>
         </div>
       </div>
       
