@@ -62,7 +62,7 @@ export default function FrameView() {
   const [sdkContext, setSdkContext] = useState<any>(null);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   
-  // Enhanced SDK loading with retry - modified to better handle Farcaster context
+  // Enhanced SDK loading with retry
   useEffect(() => {
     let isMounted = true;
     let retryCount = 0;
@@ -71,8 +71,6 @@ export default function FrameView() {
     const loadSDK = async () => {
       try {
         console.log("Initializing Farcaster SDK...");
-        
-        // Wait for the SDK context
         const contextData = await sdk.context;
         
         if (!isMounted) return;
@@ -134,22 +132,6 @@ export default function FrameView() {
     fetchFrame();
   }, [frameId]);
 
-  // Custom sign frame action - modified to better handle Farcaster signing
-  const customSignFrameAction = useCallback(async (...args: any[]) => {
-    console.log("Signing frame action with args:", args);
-    
-    try {
-      // Use the imported signFrameAction but with better error handling
-      const result = await signFrameAction(...args);
-      console.log("Frame action signing successful:", result);
-      return result;
-    } catch (error) {
-      console.error("Error signing frame action:", error);
-      // Return original message as fallback
-      return args[0];
-    }
-  }, []);
-
   // Create a Farcaster signer based on SDK context
   const hasFarcasterUser = isSDKLoaded && !!sdkContext?.user?.fid;
   
@@ -178,8 +160,8 @@ export default function FrameView() {
       }
     },
 
-    // Use our custom sign frame action
-    signFrameAction: customSignFrameAction,
+    // Use the original signFrameAction directly
+    signFrameAction,
 
     async logout() {
       console.log("Logout requested");
@@ -191,7 +173,7 @@ export default function FrameView() {
     })
   };
   
-  // Initialize frameState - made conditional on having frame data
+  // Initialize frameState
   const frameState = useFrame({
     homeframeUrl: frame?.url || "",
     frameActionProxy: "/frames",
@@ -427,7 +409,7 @@ export default function FrameView() {
         </div>
       </div>
       
-      {/* Debug panel - always visible */}
+      {/* Debug panel */}
       <FrameDebugPanel frameState={frameState} isVisible={true} />
     </div>
   );
