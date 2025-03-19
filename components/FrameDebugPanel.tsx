@@ -2,11 +2,25 @@
 
 import { useState, useEffect } from "react";
 
+// Define props interface with proper types
+interface FrameDebugPanelProps {
+  frameState: any; // Using any for frameState since its structure varies
+  isVisible?: boolean;
+}
+
 // Improved debug panel that handles null frameState
-export function FrameDebugPanel({ frameState, isVisible = false }) {
+export function FrameDebugPanel({ frameState, isVisible = false }: FrameDebugPanelProps) {
   const [showDebug, setShowDebug] = useState(isVisible);
-  const [errorLog, setErrorLog] = useState([]);
-  const [requestLog, setRequestLog] = useState([]);
+  const [errorLog, setErrorLog] = useState<Array<{
+    time: string;
+    statusCode?: number;
+    message: string;
+  }>>([]);
+  const [requestLog, setRequestLog] = useState<Array<{
+    time: string;
+    buttonIndex: number;
+    inputText: string | null;
+  }>>([]);
   const [sdkStatus, setSdkStatus] = useState("unknown");
   
   // Track frame state changes for debugging
@@ -14,25 +28,28 @@ export function FrameDebugPanel({ frameState, isVisible = false }) {
     if (!frameState) return;
     
     // Log state changes
-    console.log("Frame state updated:", frameState.status);
+    const status = (frameState as any).status;
+    if (status) {
+      console.log("Frame state updated:", status);
+    }
     
     // Only log significant changes or errors
-    if (frameState.status === "error" && frameState.error) {
+    if ((frameState as any).status === "error" && (frameState as any).error) {
       const newError = {
         time: new Date().toLocaleTimeString(),
-        statusCode: frameState.error.statusCode,
-        message: frameState.error.message,
+        statusCode: (frameState as any).error.statusCode,
+        message: (frameState as any).error.message || "Unknown error",
       };
       
       setErrorLog(prev => [newError, ...prev].slice(0, 5)); // Keep last 5 errors
     }
     
     // Track when buttons are clicked
-    if (frameState.status === "button-pressed") {
+    if ((frameState as any).status === "button-pressed") {
       const newRequest = {
         time: new Date().toLocaleTimeString(),
-        buttonIndex: frameState.buttonIndex,
-        inputText: frameState.inputText || null,
+        buttonIndex: (frameState as any).buttonIndex || 0,
+        inputText: (frameState as any).inputText || null,
       };
       
       setRequestLog(prev => [newRequest, ...prev].slice(0, 3)); // Keep last 3 requests
@@ -93,25 +110,25 @@ export function FrameDebugPanel({ frameState, isVisible = false }) {
               <span>Status:</span>
               <span className={
                 !frameState ? "text-yellow-400" :
-                frameState.status === "error" ? "text-red-400" : 
+                (frameState as any).status === "error" ? "text-red-400" : 
                 "text-green-400"
               }>
-                {!frameState ? "initializing" : frameState.status || "unknown"}
+                {!frameState ? "initializing" : (frameState as any).status || "unknown"}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Auth:</span>
               <span className={
                 !frameState ? "text-yellow-400" :
-                frameState.signerState?.hasSigner ? "text-green-400" : 
+                (frameState as any).signerState?.hasSigner ? "text-green-400" : 
                 "text-red-400"
               }>
-                {!frameState ? "..." : (frameState.signerState?.hasSigner ? "✓" : "✗")}
+                {!frameState ? "..." : ((frameState as any).signerState?.hasSigner ? "✓" : "✗")}
               </span>
             </div>
             <div className="flex justify-between">
               <span>FID:</span>
-              <span>{!frameState ? "loading" : (frameState.signerState?.signer?.fid || "none")}</span>
+              <span>{!frameState ? "loading" : ((frameState as any).signerState?.signer?.fid || "none")}</span>
             </div>
             <div className="flex justify-between">
               <span>SDK:</span>
@@ -123,11 +140,11 @@ export function FrameDebugPanel({ frameState, isVisible = false }) {
                 {sdkStatus}
               </span>
             </div>
-            {frameState && frameState.frameUrl && (
+            {frameState && (frameState as any).frameUrl && (
               <div className="flex justify-between">
                 <span>URL:</span>
-                <span className="truncate max-w-40" title={frameState.frameUrl}>
-                  {new URL(frameState.frameUrl).hostname}
+                <span className="truncate max-w-40" title={(frameState as any).frameUrl}>
+                  {new URL((frameState as any).frameUrl).hostname}
                 </span>
               </div>
             )}
@@ -171,7 +188,7 @@ export function FrameDebugPanel({ frameState, isVisible = false }) {
               Log State
             </button>
             <button 
-              onClick={() => console.log("SDK context:", window.farcaster)}
+              onClick={() => console.log("SDK context:", (window as any).farcaster)}
               className="bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-[10px]"
             >
               Log SDK
