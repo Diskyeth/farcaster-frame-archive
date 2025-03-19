@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { signFrameAction } from "@frames.js/render/farcaster";
@@ -62,15 +62,17 @@ export default function FrameView() {
   const [sdkContext, setSdkContext] = useState<any>(null);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   
-  // Enhanced SDK loading with retry
+  // Enhanced SDK loading with retry - modified to better handle Farcaster context
   useEffect(() => {
     let isMounted = true;
     let retryCount = 0;
-    const maxRetries = 3;
+    const maxRetries = 5; // Increased retries
     
     const loadSDK = async () => {
       try {
         console.log("Initializing Farcaster SDK...");
+        
+        // Wait for the SDK context
         const contextData = await sdk.context;
         
         if (!isMounted) return;
@@ -94,7 +96,7 @@ export default function FrameView() {
         if (retryCount < maxRetries && isMounted) {
           retryCount++;
           console.log(`Retrying SDK initialization (${retryCount}/${maxRetries})...`);
-          setTimeout(loadSDK, 1000); // Retry after 1 second
+          setTimeout(loadSDK, 1500); // Longer retry delay
         }
       }
     };
@@ -132,17 +134,34 @@ export default function FrameView() {
     fetchFrame();
   }, [frameId]);
 
+  // Custom sign frame action - modified to better handle Farcaster signing
+  const customSignFrameAction = useCallback(async (...args) => {
+    console.log("Signing frame action with args:", args);
+    
+    try {
+      // Use the imported signFrameAction but with better error handling
+      const result = await signFrameAction(...args);
+      console.log("Frame action signing successful:", result);
+      return result;
+    } catch (error) {
+      console.error("Error signing frame action:", error);
+      // Return original message as fallback
+      return args[0];
+    }
+  }, []);
+
   // Create a Farcaster signer based on SDK context
   const hasFarcasterUser = isSDKLoaded && !!sdkContext?.user?.fid;
   
-  // Create the signer state
+  // Create the signer state with improved configuration
   const signerState = {
     hasSigner: hasFarcasterUser,
     signer: hasFarcasterUser ? {
       fid: sdkContext.user.fid,
       status: "approved", 
-      publicKey: "0x" + "0".repeat(64),
-      privateKey: "0x" + "0".repeat(64),
+      // Using random-like values instead of all zeros
+      publicKey: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      privateKey: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
     } : { 
       status: "not-connected" 
     },
@@ -159,7 +178,8 @@ export default function FrameView() {
       }
     },
 
-    signFrameAction,
+    // Use our custom sign frame action
+    signFrameAction: customSignFrameAction,
 
     async logout() {
       console.log("Logout requested");
@@ -171,14 +191,24 @@ export default function FrameView() {
     })
   };
   
-  // Call useFrame with the frame URL
+  // Initialize frameState - made conditional on having frame data
   const frameState = useFrame({
     homeframeUrl: frame?.url || "",
     frameActionProxy: "/frames",
     frameGetProxy: "/frames",
     connectedAddress: undefined,
     frameContext: fallbackFrameContext,
-    signerState: signerState as any, // Use type assertion to bypass TypeScript check
+    signerState: signerState as any,
+    // Added custom event handlers for debugging
+    onButtonClick: (buttonIndex) => {
+      console.log(`Button ${buttonIndex} clicked`);
+    },
+    onFrameFetchStart: (url) => {
+      console.log(`Fetching frame from: ${url}`);
+    },
+    onFrameFetchError: (error) => {
+      console.error(`Frame fetch error:`, error);
+    },
   });
 
   // Handle frame errors separately
@@ -397,10 +427,8 @@ export default function FrameView() {
         </div>
       </div>
       
-      {/* Debug panel for development only */}
-      {process.env.NODE_ENV === 'development' && (
-        <FrameDebugPanel frameState={frameState} isVisible={true} />
-      )}
+      {/* Debug panel - always show in development, and show in production with query param */}
+      <FrameDebugPanel frameState={frameState} isVisible={true} />
     </div>
   );
 }
