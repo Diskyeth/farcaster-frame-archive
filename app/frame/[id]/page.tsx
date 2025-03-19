@@ -57,6 +57,7 @@ export default function FrameView() {
   const [frame, setFrame] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [frameError, setFrameError] = useState<any>(null);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [sdkContext, setSdkContext] = useState<any>(null);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
@@ -144,7 +145,7 @@ export default function FrameView() {
       privateKey: "0x" + "0".repeat(64),
     } : { status: "not-connected" },
     isLoadingSigner: !isSDKLoaded,
-    specification: "farcaster-signature", // TypeScript will infer the correct type
+    specification: "farcaster-signature",
 
     async onSignerlessFramePress(buttonIndex: number) {
       console.log("Frame button pressed without a signer, button index:", buttonIndex);
@@ -173,18 +174,22 @@ export default function FrameView() {
     signerState: signerState as any, // Use type assertion to bypass TypeScript check
   });
 
-  // Log frame interactions for debugging
+  // Handle frame errors separately
   useEffect(() => {
     if (!frameState) return;
     
-    if (frameState.status === "error" && frameState.error) {
-      console.error("Frame error:", frameState.error);
+    // Check for errors in the frame state
+    // Since we don't know the exact structure, we'll check various properties
+    const anyFrameState = frameState as any;
+    
+    if (anyFrameState.error) {
+      console.error("Frame error detected:", anyFrameState.error);
+      setFrameError(anyFrameState.error);
       
-      if (frameState.error.statusCode === 401) {
-        console.warn("Authentication error when interacting with frame");
+      // Check for 401 specifically
+      if (anyFrameState.error.statusCode === 401) {
+        console.warn("Authentication error (401) when interacting with frame");
       }
-    } else if (frameState.status) {
-      console.log("Frame state changed:", frameState.status);
     }
   }, [frameState]);
 
@@ -275,7 +280,7 @@ export default function FrameView() {
                 </svg>
               </div>
               <div className="flex-grow">
-                <p className="text-yellow-400 text-sm">Not connected to Farcaster. Frame interactions may fail.</p>
+                <p className="text-yellow-400 text-sm">Not connected to Farcaster. Some frame interactions may fail.</p>
                 <p className="text-xs text-gray-400 mt-1">Please connect with a Farcaster account to interact with frames.</p>
               </div>
               <button 
@@ -303,12 +308,12 @@ export default function FrameView() {
           <FrameUI frameState={frameState} components={components} theme={theme} />
           
           {/* Show error messages related to frame interactions */}
-          {frameState.status === "error" && frameState.error && (
+          {frameError && (
             <div className="mt-3 p-3 bg-red-500 bg-opacity-10 border border-red-500 rounded-lg">
               <p className="text-red-400 text-sm">
-                Error: {frameState.error.message || "Failed to interact with frame"}
+                Error: {frameError.message || "Failed to interact with frame"}
               </p>
-              {frameState.error.statusCode === 401 && (
+              {frameError.statusCode === 401 && (
                 <p className="text-red-300 text-xs mt-1">
                   This frame requires Farcaster authentication.
                 </p>
