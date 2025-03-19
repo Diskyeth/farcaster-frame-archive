@@ -173,6 +173,16 @@ export default function FrameView() {
     })
   };
   
+  // Add a handler for logging frame interactions
+  const handleFrameEvents = {
+    onEvent: (event: any) => {
+      console.log("Frame event:", event);
+    },
+    onError: (error: any) => {
+      console.error("Frame error:", error);
+    }
+  };
+  
   // Initialize frameState
   const frameState = useFrame({
     homeframeUrl: frame?.url || "",
@@ -181,16 +191,20 @@ export default function FrameView() {
     connectedAddress: undefined,
     frameContext: fallbackFrameContext,
     signerState: signerState as any,
-    // Added custom event handlers for debugging
-    onButtonClick: (buttonIndex: number) => {
-      console.log(`Button ${buttonIndex} clicked`);
+    // Event handlers
+    onEvent: (event: any) => {
+      console.log("Frame event:", event);
+      
+      // Log specific events
+      if (event.type === "button-click") {
+        console.log(`Button ${event.buttonIndex} clicked`);
+      } else if (event.type === "frame-fetch-start") {
+        console.log(`Fetching frame from: ${event.url}`);
+      }
     },
-    onFrameFetchStart: (url: string) => {
-      console.log(`Fetching frame from: ${url}`);
-    },
-    onFrameFetchError: (error: any) => {
-      console.error(`Frame fetch error:`, error);
-    },
+    onError: (error: any) => {
+      console.error("Frame error:", error);
+    }
   });
 
   // Handle frame errors separately
@@ -207,6 +221,11 @@ export default function FrameView() {
       // Check for 401 specifically
       if (anyFrameState.error.statusCode === 401) {
         console.warn("Authentication error (401) when interacting with frame");
+      }
+      
+      // Check for 500 specifically
+      if (anyFrameState.error.statusCode === 500) {
+        console.warn("Server error (500) from frame provider - this is an issue with the frame, not your authentication");
       }
     }
   }, [frameState]);
@@ -333,6 +352,11 @@ export default function FrameView() {
               {frameError.statusCode === 401 && (
                 <p className="text-red-300 text-xs mt-1">
                   This frame requires Farcaster authentication
+                </p>
+              )}
+              {frameError.statusCode === 500 && (
+                <p className="text-red-300 text-xs mt-1">
+                  The frame provider server encountered an error. This is an issue with the frame, not your authentication.
                 </p>
               )}
             </div>
