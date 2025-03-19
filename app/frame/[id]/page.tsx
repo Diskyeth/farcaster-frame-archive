@@ -10,6 +10,8 @@ import {
 import { useFrame } from "@frames.js/render/use-frame";
 import { fallbackFrameContext, type FrameContext } from "@frames.js/render";
 import { FrameUI, type FrameUIComponents, type FrameUITheme } from "@frames.js/render/ui";
+import { type SupportedParsingSpecification } from "@frames.js/frames.js";
+import { type FrameActionBodyPayload } from "@frames.js/render/types";
 import sdk from '@farcaster/frame-sdk';
 import { FrameDebugPanel } from '@/components/FrameDebugPanel';
 
@@ -52,16 +54,16 @@ const theme: FrameUITheme<StylingProps> = {
   TextInputContainer: { className: "w-full px-2" },
 };
 
-// Fix type issues by properly defining types
+// Define the correct type for signerState
 type FarcasterSignerState = {
   hasSigner: boolean;
   signer: FarcasterSigner | { status: string };
   isLoadingSigner: boolean;
-  specification: string;
+  specification: SupportedParsingSpecification | SupportedParsingSpecification[];
   onSignerlessFramePress: (buttonIndex: number) => Promise<void>;
   signFrameAction: typeof signFrameAction;
   logout: () => Promise<void>;
-  withContext: (context: FrameContext) => { signerState: FarcasterSignerState; frameContext: FrameContext };
+  withContext: (context: FrameContext) => { signerState: any; frameContext: FrameContext };
 };
 
 export default function FrameView() {
@@ -149,8 +151,8 @@ export default function FrameView() {
   // Create a Farcaster signer based on SDK context
   const hasFarcasterUser = isSDKLoaded && !!sdkContext?.user?.fid;
   
-  // Fixed signerState with properly typed withContext
-  const signerState: FarcasterSignerState = {
+  // Create the signer state directly without explicit type
+  const signerState = {
     hasSigner: hasFarcasterUser,
     signer: hasFarcasterUser ? {
       fid: sdkContext.user.fid,
@@ -159,9 +161,9 @@ export default function FrameView() {
       privateKey: "0x" + "0".repeat(64),
     } : { status: "not-connected" },
     isLoadingSigner: !isSDKLoaded,
-    specification: "farcaster-signature",
+    specification: "farcaster-signature" as SupportedParsingSpecification,
 
-    async onSignerlessFramePress(buttonIndex) {
+    async onSignerlessFramePress(buttonIndex: number) {
       console.log("Frame button pressed without a signer, button index:", buttonIndex);
       setError("Please connect your Farcaster account to interact with this frame");
     },
@@ -172,14 +174,13 @@ export default function FrameView() {
       console.log("Logout requested");
     },
 
-    withContext: (context) => ({
+    withContext: (context: FrameContext) => ({
       signerState,
       frameContext: context,
     })
   };
   
-  // Important: Only call useFrame when we have the frame URL
-  // This fixes the "Invalid hook call" error
+  // Call useFrame with the frame URL
   const frameState = useFrame({
     homeframeUrl: frame?.url || "",
     frameActionProxy: "/frames",
