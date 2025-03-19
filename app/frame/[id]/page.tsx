@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { signFrameAction } from "@frames.js/render/farcaster";
@@ -173,17 +173,7 @@ export default function FrameView() {
     })
   };
   
-  // Add a handler for logging frame interactions
-  const handleFrameEvents = {
-    onEvent: (event: any) => {
-      console.log("Frame event:", event);
-    },
-    onError: (error: any) => {
-      console.error("Frame error:", error);
-    }
-  };
-  
-  // Initialize frameState
+  // Initialize frameState - using the simplest approach without custom event handlers
   const frameState = useFrame({
     homeframeUrl: frame?.url || "",
     frameActionProxy: "/frames",
@@ -191,25 +181,14 @@ export default function FrameView() {
     connectedAddress: undefined,
     frameContext: fallbackFrameContext,
     signerState: signerState as any,
-    // Event handlers
-    onEvent: (event: any) => {
-      console.log("Frame event:", event);
-      
-      // Log specific events
-      if (event.type === "button-click") {
-        console.log(`Button ${event.buttonIndex} clicked`);
-      } else if (event.type === "frame-fetch-start") {
-        console.log(`Fetching frame from: ${event.url}`);
-      }
-    },
-    onError: (error: any) => {
-      console.error("Frame error:", error);
-    }
   });
 
   // Handle frame errors separately
   useEffect(() => {
     if (!frameState) return;
+    
+    // Log all frame state updates for debugging
+    console.log("Frame state updated:", frameState);
     
     // Check for errors in the frame state
     const anyFrameState = frameState as any;
