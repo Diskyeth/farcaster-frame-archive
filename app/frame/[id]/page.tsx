@@ -135,7 +135,7 @@ export default function FrameView() {
   }, [frameId]);
 
   // Custom sign frame action - modified to better handle Farcaster signing
-  const customSignFrameAction = useCallback(async (...args) => {
+  const customSignFrameAction = useCallback(async (...args: any[]) => {
     console.log("Signing frame action with args:", args);
     
     try {
@@ -200,13 +200,13 @@ export default function FrameView() {
     frameContext: fallbackFrameContext,
     signerState: signerState as any,
     // Added custom event handlers for debugging
-    onButtonClick: (buttonIndex) => {
+    onButtonClick: (buttonIndex: number) => {
       console.log(`Button ${buttonIndex} clicked`);
     },
-    onFrameFetchStart: (url) => {
+    onFrameFetchStart: (url: string) => {
       console.log(`Fetching frame from: ${url}`);
     },
-    onFrameFetchError: (error) => {
+    onFrameFetchError: (error: any) => {
       console.error(`Frame fetch error:`, error);
     },
   });
@@ -427,7 +427,7 @@ export default function FrameView() {
         </div>
       </div>
       
-      {/* Debug panel - always show in development, and show in production with query param */}
+      {/* Debug panel - always visible */}
       <FrameDebugPanel frameState={frameState} isVisible={true} />
     </div>
   );
