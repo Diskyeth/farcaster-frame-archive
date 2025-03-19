@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Define props interface with proper types
 interface FrameDebugPanelProps {
@@ -22,14 +22,22 @@ export function FrameDebugPanel({ frameState, isVisible = false }: FrameDebugPan
     inputText: string | null;
   }>>([]);
   const [sdkStatus, setSdkStatus] = useState("unknown");
+  const [sdkContext, setSdkContext] = useState<any>(null);
+  
+  // Add a ref to track debug status changes for logging
+  const prevFrameState = useRef<any>(null);
   
   // Track frame state changes for debugging
   useEffect(() => {
     if (!frameState) return;
     
+    // Check for changes that are worth logging
+    const hasChanged = prevFrameState.current?.status !== (frameState as any).status;
+    prevFrameState.current = { ...frameState };
+    
     // Log state changes
     const status = (frameState as any).status;
-    if (status) {
+    if (status && hasChanged) {
       console.log("Frame state updated:", status);
     }
     
@@ -41,7 +49,13 @@ export function FrameDebugPanel({ frameState, isVisible = false }: FrameDebugPan
         message: (frameState as any).error.message || "Unknown error",
       };
       
-      setErrorLog(prev => [newError, ...prev].slice(0, 5)); // Keep last 5 errors
+      setErrorLog(prev => {
+        // Check if this error is already in the log to avoid duplicates
+        if (prev.some(e => e.message === newError.message && e.statusCode === newError.statusCode)) {
+          return prev;
+        }
+        return [newError, ...prev].slice(0, 5); // Keep last 5 errors
+      });
     }
     
     // Track when buttons are clicked
@@ -56,15 +70,57 @@ export function FrameDebugPanel({ frameState, isVisible = false }: FrameDebugPan
     }
   }, [frameState]);
   
-  // Check for SDK status
+  // Better SDK detection that checks both window.farcaster and the SDK import
   useEffect(() => {
-    // @ts-ignore (for window.farcaster access)
-    if (typeof window !== 'undefined' && window.farcaster) {
-      setSdkStatus("available");
-    } else {
-      setSdkStatus("unavailable");
-    }
-  }, []);
+    const checkSdk = async () => {
+      try {
+        // Check if SDK is available through the global window object
+        if (typeof window !== 'undefined' && (window as any).farcaster) {
+          setSdkStatus("available");
+          setSdkContext((window as any).farcaster);
+          return;
+        }
+        
+        // Try to access SDK context via the import
+        try {
+          const sdk = await import('@farcaster/frame-sdk');
+          const contextData = await sdk.default.context;
+          if (contextData) {
+            setSdkStatus("available");
+            setSdkContext(contextData);
+            return;
+          }
+        } catch (e) {
+          console.log("SDK import check failed", e);
+        }
+        
+        // Check if we can find any user data in the frameState
+        const signerState = (frameState as any)?.signerState;
+        const hasFid = signerState?.signer?.fid || signerState?.hasSigner;
+        
+        if (hasFid) {
+          setSdkStatus("available");
+          setSdkContext({ user: { fid: signerState?.signer?.fid } });
+          return;
+        }
+        
+        // No SDK found
+        setSdkStatus("unavailable");
+      } catch (err) {
+        console.error("Error checking SDK:", err);
+        setSdkStatus("error");
+      }
+    };
+    
+    checkSdk();
+    
+    // Check periodically in case it loads later
+    const checkInterval = setInterval(checkSdk, 3000);
+    
+    return () => {
+      clearInterval(checkInterval);
+    };
+  }, [frameState]);
   
   // Toggle debug panel visibility
   const toggleDebug = () => {
@@ -76,6 +132,56 @@ export function FrameDebugPanel({ frameState, isVisible = false }: FrameDebugPan
     if (typeof window !== 'undefined') {
       window.location.reload();
     }
+  };
+  
+  // Log frame state to console
+  const logFrameState = () => {
+    if (!frameState) return;
+    
+    console.group("Frame State Debug Info");
+    console.log("Full frame state:", frameState);
+    console.log("Status:", (frameState as any).status);
+    console.log("Frame URL:", (frameState as any).frameUrl);
+    console.log("Has signer:", (frameState as any).signerState?.hasSigner);
+    console.log("FID:", (frameState as any).signerState?.signer?.fid);
+    console.log("Errors:", (frameState as any).error);
+    console.groupEnd();
+  };
+  
+  // Log SDK info to console
+  const logSdkInfo = () => {
+    console.group("Farcaster SDK Debug Info");
+    console.log("SDK Status:", sdkStatus);
+    console.log("Window Farcaster object:", (window as any).farcaster);
+    console.log("SDK Context:", sdkContext);
+    
+    // Try to import SDK directly and log results
+    import('@farcaster/frame-sdk').then(sdk => {
+      console.log("SDK import successful:", sdk);
+      sdk.default.context.then((context: any) => {
+        console.log("SDK context from import:", context);
+      }).catch((err: any) => {
+        console.error("Error getting SDK context:", err);
+      });
+    }).catch(err => {
+      console.error("Error importing SDK:", err);
+    });
+    
+    console.groupEnd();
+  };
+  
+  // Extract FID from all possible sources
+  const extractFid = () => {
+    // Check frame state signer
+    const frameFid = (frameState as any)?.signerState?.signer?.fid;
+    
+    // Check SDK context
+    const sdkFid = sdkContext?.user?.fid;
+    
+    // Check window Farcaster
+    const windowFid = (window as any)?.farcaster?.user?.fid;
+    
+    return frameFid || sdkFid || windowFid || "none";
   };
   
   return (
@@ -128,7 +234,7 @@ export function FrameDebugPanel({ frameState, isVisible = false }: FrameDebugPan
             </div>
             <div className="flex justify-between">
               <span>FID:</span>
-              <span>{!frameState ? "loading" : ((frameState as any).signerState?.signer?.fid || "none")}</span>
+              <span>{extractFid()}</span>
             </div>
             <div className="flex justify-between">
               <span>SDK:</span>
@@ -144,7 +250,7 @@ export function FrameDebugPanel({ frameState, isVisible = false }: FrameDebugPan
               <div className="flex justify-between">
                 <span>URL:</span>
                 <span className="truncate max-w-40" title={(frameState as any).frameUrl}>
-                  {new URL((frameState as any).frameUrl).hostname}
+                  {(frameState as any).frameUrl ? new URL((frameState as any).frameUrl).hostname : "none"}
                 </span>
               </div>
             )}
@@ -181,18 +287,26 @@ export function FrameDebugPanel({ frameState, isVisible = false }: FrameDebugPan
           
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button 
-              onClick={() => frameState && console.log("Frame state:", frameState)}
+              onClick={logFrameState}
               className="bg-blue-800 hover:bg-blue-700 px-2 py-1 rounded text-[10px]"
               disabled={!frameState}
             >
               Log State
             </button>
             <button 
-              onClick={() => console.log("SDK context:", (window as any).farcaster)}
+              onClick={logSdkInfo}
               className="bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-[10px]"
             >
               Log SDK
             </button>
+          </div>
+          
+          <div className="mt-2 text-center text-[10px] text-gray-400">
+            {sdkStatus === "unavailable" ? (
+              <div className="bg-red-500 bg-opacity-20 p-1 rounded mt-2">
+                SDK not detected - Interactions may fail
+              </div>
+            ) : null}
           </div>
         </div>
       )}

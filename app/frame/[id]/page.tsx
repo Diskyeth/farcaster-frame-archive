@@ -143,13 +143,20 @@ export default function FrameView() {
       status: "approved", 
       publicKey: "0x" + "0".repeat(64),
       privateKey: "0x" + "0".repeat(64),
-    } : { status: "not-connected" },
+    } : { 
+      status: "not-connected" 
+    },
     isLoadingSigner: !isSDKLoaded,
     specification: "farcaster-signature",
 
     async onSignerlessFramePress(buttonIndex: number) {
       console.log("Frame button pressed without a signer, button index:", buttonIndex);
-      setError("Please connect your Farcaster account to interact with this frame");
+      if (!hasFarcasterUser) {
+        setFrameError({
+          message: "Authentication required to interact with this frame",
+          statusCode: 401
+        });
+      }
     },
 
     signFrameAction,
@@ -179,7 +186,6 @@ export default function FrameView() {
     if (!frameState) return;
     
     // Check for errors in the frame state
-    // Since we don't know the exact structure, we'll check various properties
     const anyFrameState = frameState as any;
     
     if (anyFrameState.error) {
@@ -280,8 +286,7 @@ export default function FrameView() {
                 </svg>
               </div>
               <div className="flex-grow">
-                <p className="text-yellow-400 text-sm">Not connected to Farcaster. Some frame interactions may fail.</p>
-                <p className="text-xs text-gray-400 mt-1">Please connect with a Farcaster account to interact with frames.</p>
+                <p className="text-yellow-400 text-sm">Farcaster authentication required for frame interactions.</p>
               </div>
               <button 
                 onClick={() => window.location.reload()}
@@ -299,7 +304,7 @@ export default function FrameView() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </div>
-            <div className="text-sm">Loading Farcaster connection...</div>
+            <div className="text-sm">Checking Farcaster connection...</div>
           </div>
         )}
         
@@ -315,7 +320,7 @@ export default function FrameView() {
               </p>
               {frameError.statusCode === 401 && (
                 <p className="text-red-300 text-xs mt-1">
-                  This frame requires Farcaster authentication.
+                  This frame requires Farcaster authentication
                 </p>
               )}
             </div>
@@ -392,8 +397,10 @@ export default function FrameView() {
         </div>
       </div>
       
-      {/* Debug panel */}
-      <FrameDebugPanel frameState={frameState} isVisible={true} />
+      {/* Debug panel for development only */}
+      {process.env.NODE_ENV === 'development' && (
+        <FrameDebugPanel frameState={frameState} isVisible={true} />
+      )}
     </div>
   );
 }
