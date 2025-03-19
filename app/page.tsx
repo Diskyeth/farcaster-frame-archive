@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -37,13 +37,20 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [shareStatuses, setShareStatuses] = useState<Record<string, string | null>>({});
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [context, setContext] = useState<any>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Reference for menu container
+  const menuRef = useRef<HTMLDivElement>(null);
 
 
   useEffect(() => {
     const loadSDK = async () => {
       try {
-        await sdk.context;
+        const contextData = await sdk.context;
+        setContext(contextData);
         setIsSDKLoaded(true);
+        sdk.actions.ready();
       } catch (err) {
         console.error("Failed to load Frame SDK:", err);
       }
@@ -175,6 +182,27 @@ export default function HomePage() {
       window.open('https://forms.gle/oqpNiuK6vkveHhNv9', '_top');
     }
   }, [isSDKLoaded]);
+  
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
+
+  // Add click outside handler to close the menu
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   const isLoading = isLoadingTags || isLoadingFrames;
 
@@ -200,25 +228,69 @@ export default function HomePage() {
           <Image src="/logo.png" alt="Logo" width={204} height={50} priority />
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.push('/load-frame')}
-            className="px-4 py-2 bg-[#1D1D29] text-white rounded-full hover:bg-[#2A2A3C] flex items-center gap-2 border border-[#2A2A3C]"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            Load
-          </button>
+         {/* User Profile Picture or Placeholder */}
+         {isSDKLoaded && context?.user && (
+            <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden border border-[#2A2A3C] flex items-center justify-center">
+              {context.user.pfpUrl ? (
+                <Image 
+                  src={context.user.pfpUrl}
+                  alt={context.user.username || "User"}
+                  width={40}
+                  height={40}
+                  className="object-cover w-full h-full"
+                  unoptimized={true}
+                />
+              ) : (
+                <div className="w-full h-full bg-[#8C56FF] flex items-center justify-center text-white text-sm font-medium">
+                  {context.user.username ? context.user.username.charAt(0).toUpperCase() : "?"}
+                </div>
+              )}
+            </div>
+          )}
           
-          <button 
-            onClick={handleSubmitClick}
-            className="px-4 py-2 bg-[#8C56FF] text-white rounded-full hover:opacity-90 flex items-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Submit
-          </button>
+          <div className="relative" ref={menuRef}>
+            {/* Hamburger Menu Button */}
+            <button
+              onClick={toggleMenu}
+              className="p-2 bg-[#1D1D29] text-white rounded-full hover:bg-[#2A2A3C] flex items-center justify-center border border-[#2A2A3C]"
+              aria-label="Menu"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          
+            {/* Dropdown Menu */}
+            {isMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-[#1D1D29] rounded-lg shadow-lg z-10 py-2 border border-[#2A2A3C] overflow-hidden">
+                <button
+                  onClick={() => {
+                    router.push('/load-frame');
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-white hover:bg-[#2A2A3C] flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  Load Frame
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    handleSubmitClick();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-white hover:bg-[#2A2A3C] flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Submit Frame
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
