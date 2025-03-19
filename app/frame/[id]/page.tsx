@@ -4,10 +4,11 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  signFrameAction
+  signFrameAction,
+  type FarcasterSigner
 } from "@frames.js/render/farcaster";
 import { useFrame } from "@frames.js/render/use-frame";
-import { fallbackFrameContext } from "@frames.js/render";
+import { fallbackFrameContext, type FrameContext } from "@frames.js/render";
 import { FrameUI, type FrameUIComponents, type FrameUITheme } from "@frames.js/render/ui";
 import sdk from '@farcaster/frame-sdk';
 import { FrameDebugPanel } from '@/components/FrameDebugPanel';
@@ -51,16 +52,28 @@ const theme: FrameUITheme<StylingProps> = {
   TextInputContainer: { className: "w-full px-2" },
 };
 
+// Fix type issues by properly defining types
+type FarcasterSignerState = {
+  hasSigner: boolean;
+  signer: FarcasterSigner | { status: string };
+  isLoadingSigner: boolean;
+  specification: string;
+  onSignerlessFramePress: (buttonIndex: number) => Promise<void>;
+  signFrameAction: typeof signFrameAction;
+  logout: () => Promise<void>;
+  withContext: (context: FrameContext) => { signerState: FarcasterSignerState; frameContext: FrameContext };
+};
+
 export default function FrameView() {
   const router = useRouter();
   const params = useParams();
   const frameId = params?.id as string;
   
-  const [frame, setFrame] = useState(null);
+  const [frame, setFrame] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [shareStatus, setShareStatus] = useState(null);
-  const [sdkContext, setSdkContext] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const [sdkContext, setSdkContext] = useState<any>(null);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   
   // Enhanced SDK loading with retry
@@ -136,7 +149,8 @@ export default function FrameView() {
   // Create a Farcaster signer based on SDK context
   const hasFarcasterUser = isSDKLoaded && !!sdkContext?.user?.fid;
   
-  const signerState = {
+  // Fixed signerState with properly typed withContext
+  const signerState: FarcasterSignerState = {
     hasSigner: hasFarcasterUser,
     signer: hasFarcasterUser ? {
       fid: sdkContext.user.fid,
@@ -161,7 +175,7 @@ export default function FrameView() {
     withContext: (context) => ({
       signerState,
       frameContext: context,
-    }),
+    })
   };
   
   // Important: Only call useFrame when we have the frame URL
@@ -244,7 +258,7 @@ export default function FrameView() {
           </div>
         </header>
         
-        {/* Farcaster user status - improved with more details */}
+        {/* Farcaster user status */}
         {isSDKLoaded ? (
           sdkContext?.user?.fid ? (
             <div className="bg-[#1D1D29] p-3 rounded-lg mb-4 flex items-center">
